@@ -5,25 +5,36 @@
 **This repo is still under active development, there will be breaking API changes**
 
 **Qiskit Dynamics** is an open-source project for building, transforming, and solving
-models of quantum systems in Qiskit. This package is in a pre-release stage and does not yet have
-an official stable version, and as such substantial API changes should be expected.
+models of quantum systems in Qiskit, with an eye towards classical simulation-heavy applications
+like optimal control and model learning. This package is in a pre-release stage and does not yet
+have an official stable version, and as such substantial API changes should be expected.
 
-The goal of this package is to provide tools for flexibly constructing models and simulating
-quantum dynamics, with an eye towards classical simulation-heavy applications like optimal
-control and model learning. To facilitate this, some of the design elements of this package
-are:
-- Tools for building both models of quantum systems, such as Hamiltonians and Lindblad dissipators.
-- Tools for building models of classical electronics, for simulation of signal processing elements
+Some of the design elements of this package are:
+- Tools for building models of quantum systems, such as Hamiltonians and Lindblad dissipators.
+- Tools for building and simulating signal processing elements
 including IQ mixers and filters.
 - Automation of model transformations, such as entering a rotating frame or performing the
-rotating wave approximation, which typically need to be performed by hand.
+rotating wave approximation.
 - A unified interface providing modular access to various underlying numerical simulation methods,
 enabling advanced users to select the solver most appropriate to their problem.
-- Full integration with [JAX](https://github.com/google/jax), enabling just-in-time compilation
-to accelerate simulation, as well as automatic differentiation for optimization applications.
+- Full integration with [JAX](https://github.com/google/jax) for just-in-time compilation
+and automatic differentiation of the majority of functionality in Qiskit Dynamics.
 
-As we bring this package towards an official release, we have been 
+See the **example_notebooks** folder of this repo for Jupyter notebooks outlining the
+functionality of this package:
+-  **general_demo.ipynb** shows the general workflow of defining, transforming, and solving
+models.
+- **Signals.ipynb** and **TransferFunctions.ipynb** showcase the construction of time-dependent
+signals with carrier frequencies, as well as transformations on these. Furthermore,
+**pulse_to_signal.ipynb** demonstrates how to import pulse schedules from
+[Qiskit Pulse](https://qiskit.org/documentation/apidoc/pulse.html) to be simulated with models
+in this package.
+- **array_backends.ipynb** and **jax_backend_demo.ipynb** demonstrate how to enable the use of
+[JAX](https://github.com/google/jax) to both just-in-time compile and automatically differentiate
+Qiskit Dynamics functions.
 
+If you find a bug, or are seeking help understanding how to use Qiskit Dynamics, please post an
+issue.
 
 ## Contribution Guidelines
 
