@@ -4,10 +4,26 @@
 
 **This repo is still under active development, there will be breaking API changes**
 
-**Qiskit** is an open-source framework for working with noisy quantum computers
-at the level of pulses, circuits, and algorithms.
+**Qiskit Dynamics** is an open-source project for building, transforming, and solving
+models of quantum systems in Qiskit. This package is in a pre-release stage and does not yet have
+an official stable version, and as such substantial API changes should be expected.
 
-Qiskit Dynamics is a repository that provides ODE solver tools in Qiskit.
+The goal of this package is to provide tools for flexibly constructing models and simulating
+quantum dynamics, with an eye towards classical simulation-heavy applications like optimal
+control and model learning. To facilitate this, some of the design elements of this package
+are:
+- Tools for building both models of quantum systems, such as Hamiltonians and Lindblad dissipators.
+- Tools for building models of classical electronics, for simulation of signal processing elements
+including IQ mixers and filters.
+- Automation of model transformations, such as entering a rotating frame or performing the
+rotating wave approximation, which typically need to be performed by hand.
+- A unified interface providing modular access to various underlying numerical simulation methods,
+enabling advanced users to select the solver most appropriate to their problem.
+- Full integration with [JAX](https://github.com/google/jax), enabling just-in-time compilation
+to accelerate simulation, as well as automatic differentiation for optimization applications.
+
+As we bring this package towards an official release, we have been 
+
 
 ## Contribution Guidelines
 
