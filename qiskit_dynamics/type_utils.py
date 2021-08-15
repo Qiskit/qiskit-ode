@@ -316,3 +316,8 @@ def to_array(op: Union[Operator, Array, List[Operator], List[Array]]):
         return Array(op.data)
 
     return Array(op)
+
+
+def is_scalar(val) -> bool:
+    """Returns True if argument is native scalar type (complex, float, int), or False otherwise."""
+    return val is complex or val is float or val is int
