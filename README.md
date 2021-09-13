@@ -2,8 +2,6 @@
 
 [![License](https://img.shields.io/github/license/Qiskit/qiskit-experiments.svg?style=popout-square)](https://opensource.org/licenses/Apache-2.0)
 
-**This repo is still under active development, there will be breaking API changes**
-
 Qiskit Dynamics is an open-source project for building, transforming, and solving
 models of quantum systems in Qiskit.
 
