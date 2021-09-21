@@ -119,7 +119,7 @@ class Convolution(BaseTransferFunction):
             dt = signal.dt
             func_samples = Array([self._func(dt * i) for i in range(signal.duration)])
             func_samples = func_samples / sum(func_samples)
-            sig_samples = Array([signal(dt * i) for i in range(signal.duration)])
+            sig_samples = signal(dt * np.arange(signal.duration))
 
             convoluted_samples = list(np.convolve(func_samples, sig_samples))
 
