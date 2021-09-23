@@ -28,7 +28,7 @@ from qiskit_dynamics.models.operator_collections import (
 )
 from qiskit_dynamics.dispatch import Array
 from qiskit_dynamics.signals import Signal, SignalList
-from qiskit_dynamics.type_utils import to_array
+from qiskit_dynamics.type_utils import to_array, to_csr
 from .rotating_frame import RotatingFrame
 
 
@@ -390,12 +390,14 @@ class GeneratorModel(BaseGeneratorModel):
         """
 
         if new_mode == "dense":
+            self._operators = to_array(self._operators)
             self._operator_collection = DenseOperatorCollection(
                 self.get_operators(in_frame_basis=True), drift=self.get_drift(in_frame_basis=True)
             )
         elif new_mode == "sparse":
+            self._operators = to_csr(self._operators)
             self._operator_collection = SparseOperatorCollection(
-                self.get_operators(in_frame_basis=True), self.get_drift(in_frame_basis=True)
+                self.get_operators(in_frame_basis=True), drift=self.get_drift(in_frame_basis=True)
             )
         else:
             # raise error with standard message

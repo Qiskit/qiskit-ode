@@ -14,6 +14,8 @@
 """Tests for type_utils.py."""
 
 import numpy as np
+from collections.abc import Iterable
+from numpy.random import normal
 from scipy.sparse.csr import csr_matrix
 
 from qiskit.quantum_info.operators.operator import Operator
@@ -25,9 +27,11 @@ from qiskit_dynamics.type_utils import (
     vec_dissipator,
     vec_commutator,
     to_array,
+    to_csr,
+    to_numeric_matrix_type,
 )
 
-from .common import QiskitDynamicsTestCase, TestJaxBase
+from .common import QiskitDynamicsTestCase, TestJaxBase, TestQutipBase
 
 
 class TestTypeUtils(QiskitDynamicsTestCase):
@@ -256,18 +260,183 @@ class TestTypeUtils(QiskitDynamicsTestCase):
             )
         )
 
-    def test_to_array(self):
-        """Tests for to_array"""
+    # def test_to_array(self):
+    #     """Tests for to_array"""
+    #     list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+    #     normal_array = Array(np.array(list_of_ops))
+    #     list_of_arrays = [Array(op) for op in list_of_ops]
+    #     op_arr = [Operator.from_label(s) for s in "XYZ"]
+    #     sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+    #     self.assertAllClose(to_array(list_of_ops), normal_array)
+    #     self.assertAllClose(to_array(list_of_arrays), normal_array)
+    #     self.assertAllClose(to_array(op_arr), list_of_arrays)
+    #     for i in range(3):
+    #         self.assertAllClose(sparse_matrices[i].toarray(), normal_array[i])
+
+    def test_to_array_Operator(self):
+        """Tests for to_array with a single operator"""
+        op = Operator.from_label("X")
+        self.assertAllClose(to_array(op), Array([[0, 1], [1, 0]]))
+
+    def test_to_array_nparray(self):
+        """Tests for to_array with a single numpy array"""
+        ndarray = np.array([[0, 1], [1, 0]])
+        self.assertAllClose(to_array(ndarray), ndarray)
+
+    def test_to_array_sparse_matrix(self):
+        """Tests for to_array with a single sparse matrix"""
+        op = Operator.from_label("X")
+        spm = csr_matrix(op)
+        ar = Array(op)
+        self.assertAllClose(to_array(spm), ar)
+
+    def test_to_array_Operator_list(self):
+        """Tests for to_array with a list of operators"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        normal_array = Array(np.array(list_of_ops))
+        self.assertAllClose(to_array(list_of_ops), normal_array)
+
+    def test_to_array_nparray_list(self):
+        """Tests for to_array with a list of numpy arrays"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        ndarray_list = [np.array(op) for op in list_of_ops]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        self.assertAllClose(to_array(ndarray_list), list_of_arrays)
+
+    def test_to_array_3d_array(self):
+        """Tests for to_array with a list of numpy arrays"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        ndarray_list = [np.array(op) for op in list_of_ops]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        big_array = Array(list_of_arrays)
+        self.assertAllClose(to_array(ndarray_list), big_array)
+
+    def test_to_array_sparse_matrix_list(self):
+        """Tests for to_array with a list of sparse matrices"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        self.assertAllClose(to_array(sparse_matrices), list_of_arrays)
+
+    def test_to_csr_Operator(self):
+        """Tests for to_csr with a single operator"""
+        op = Operator.from_label("X")
+        self.assertAllCloseSparse(to_csr(op), csr_matrix([[0, 1], [1, 0]]))
+
+    def test_to_csr_nparray(self):
+        """Tests for to_csr with a single numpy array"""
+        nparray = np.array([[0, 1], [1, 0]])
+        self.assertAllCloseSparse(to_csr(nparray), csr_matrix(nparray))
+
+    def test_to_csr_array(self):
+        """Tests for to_csr with a single sparse matrix"""
+        op = Operator.from_label("X")
+        spm = csr_matrix(op)
+        ar = Array(op)
+        self.assertAllCloseSparse(to_csr(ar), spm)
+
+    def test_to_csr_sparse_matrix(self):
+        """Tests for to_csr with a single sparse matrix"""
+        op = Operator.from_label("X")
+        spm = csr_matrix(op)
+        self.assertAllCloseSparse(to_csr(spm), spm)
+
+    def test_to_csr_Operator_list(self):
+        """Tests for to_csr with a list of operators"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        self.assertAllCloseSparse(to_csr(list_of_ops), sparse_matrices)
+
+    def test_to_csr_nparray_list(self):
+        """Tests for to_csr with a list of numpy arrays"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        nparray_list = [np.array(op) for op in list_of_ops]
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        self.assertAllCloseSparse(to_csr(nparray_list), sparse_matrices)
+
+    def test_to_csr_sparse_matrix_list(self):
+        """Tests for to_csr with a list of sparse matrices"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        self.assertAllCloseSparse(to_csr(sparse_matrices), sparse_matrices)
+
+    def test_to_array_types(self):
+        """Type conversion tests for to_array"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        numpy_ops = np.array(list_of_ops)
+        normal_array = Array(np.array(list_of_ops))
+        op_arr = [Operator.from_label(s) for s in "XYZ"]
+        single_op = op_arr[0]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        assert isinstance(to_array(numpy_ops), np.ndarray)
+        assert isinstance(to_array(normal_array), Array)
+        assert isinstance(to_array(op_arr), np.ndarray)
+        assert isinstance(to_array(single_op), np.ndarray)
+        assert isinstance(to_array(list_of_arrays), np.ndarray)
+
+    def test_to_csr_types(self):
+        """Type conversion tests for to_array"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        numpy_ops = np.array(list_of_ops)
+        normal_array = Array(np.array(list_of_ops))
+        op_arr = [Operator.from_label(s) for s in "XYZ"]
+        single_op = op_arr[0]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        single_array = list_of_arrays[0]
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        assert isinstance(to_csr(normal_array)[0], csr_matrix)
+        assert isinstance(to_csr(numpy_ops)[0], csr_matrix)
+        assert isinstance(to_csr(op_arr)[0], csr_matrix)
+        assert isinstance(to_csr(single_op), csr_matrix)
+        assert isinstance(to_csr(single_array), csr_matrix)
+        assert isinstance(to_csr(list_of_arrays[0]), csr_matrix)
+        assert isinstance(to_csr(sparse_matrices), Iterable)
+        assert isinstance(to_csr(sparse_matrices)[0], csr_matrix)
+
+    # def test_to_csr(self):
+    #     """Tests for to_csr"""
+    #     list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+    #     normal_array = Array(np.array(list_of_ops))
+    #     list_of_arrays = [Array(op) for op in list_of_ops]
+    #     op_arr = [Operator.from_label(s) for s in "XYZ"]
+    #     sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+    #     self.assertAllCloseSparse(to_csr(list_of_ops), sparse_matrices)
+    #     self.assertAllCloseSparse(to_csr(list_of_arrays), sparse_matrices)
+    #     self.assertAllCloseSparse(to_csr(op_arr), sparse_matrices)
+    #     for i in range(3):
+    #         self.assertAllCloseSparse(sparse_matrices[i].toarray(), normal_array[i])
+
+    def test_to_numeric_matrix_type(self):
+        """Tests for to_numeric_matrix_type"""
         list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
         normal_array = Array(np.array(list_of_ops))
         list_of_arrays = [Array(op) for op in list_of_ops]
         op_arr = [Operator.from_label(s) for s in "XYZ"]
         sparse_matrices = [csr_matrix(op) for op in list_of_ops]
-        self.assertAllClose(to_array(list_of_ops), normal_array)
-        self.assertAllClose(to_array(list_of_arrays), normal_array)
-        self.assertAllClose(to_array(op_arr), list_of_arrays)
+        self.assertAllClose(to_numeric_matrix_type(list_of_ops), normal_array)
+        self.assertAllClose(to_numeric_matrix_type(list_of_arrays), normal_array)
+        self.assertAllClose(to_numeric_matrix_type(op_arr), list_of_arrays)
         for i in range(3):
-            self.assertAllClose(sparse_matrices[i].toarray(), normal_array[i])
+            self.assertAllCloseSparse(
+                to_numeric_matrix_type(sparse_matrices)[i], sparse_matrices[i]
+            )
+
+
+class TestTypeUtilsQutip(TestTypeUtils, TestQutipBase):
+    """Perform type conversion testing for qutip qobj inputs"""
+
+    def test_qutip_conversion(self):
+        try:
+            import qutip
+        except ImportError:
+            pass
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        normal_array = Array(np.array(list_of_ops))
+        sparse_matrices = [csr_matrix(op) for op in list_of_ops]
+        qutip_qobj = [qutip.Qobj(op) for op in list_of_ops]
+        self.assertAllCloseSparse(to_numeric_matrix_type(qutip_qobj)[0], sparse_matrices[0])
+        self.assertAllCloseSparse(to_csr(qutip_qobj)[0], sparse_matrices[0])
+        self.assertAllCloseSparse(to_array(qutip_qobj)[0], normal_array[0])
 
 
 class TestTypeUtilsJax(TestTypeUtils, TestJaxBase):
@@ -275,3 +444,17 @@ class TestTypeUtilsJax(TestTypeUtils, TestJaxBase):
 
     Note: This class has no body but contains tests due to inheritance.
     """
+
+    def test_to_array_types(self):
+        """Type conversion tests for to_array with jax backend"""
+        list_of_ops = [[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]]
+        numpy_ops = np.array(list_of_ops)
+        normal_array = Array(np.array(list_of_ops))
+        op_arr = [Operator.from_label(s) for s in "XYZ"]
+        single_op = op_arr[0]
+        list_of_arrays = [Array(op) for op in list_of_ops]
+        assert isinstance(to_array(numpy_ops), Array)
+        assert isinstance(to_array(normal_array), Array)
+        assert isinstance(to_array(op_arr), Array)
+        assert isinstance(to_array(single_op), Array)
+        assert isinstance(to_array(list_of_arrays), Array)

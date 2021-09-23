@@ -132,7 +132,9 @@ class TestSparseOperatorCollection(QiskitDynamicsTestCase):
             ham_ops_alt, drift=Array(drift_numpy_array)
         )
         sparse_collection_pure_array = SparseOperatorCollection(
-            Array(ham_ops), drift=Array(drift_numpy_array)
+            ham_ops,
+            drift=drift_numpy_array
+            # Array(ham_ops), drift=Array(drift_numpy_array)
         )
         a = sparse_collection_operator_list(sigVals)
         b = sparse_collection_array_list(sigVals)

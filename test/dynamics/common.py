@@ -16,13 +16,20 @@ Shared functionality and helpers for the unit tests.
 """
 
 import unittest
-from typing import Callable
+from typing import Callable, Iterable
 import numpy as np
+from scipy.sparse.base import spmatrix
 
 try:
     from jax import jit, grad
 except ImportError:
     pass
+
+try:
+    import qutip
+except ImportError:
+    pass
+
 from qiskit_dynamics import dispatch
 from qiskit_dynamics.dispatch import wrap
 
@@ -32,6 +39,20 @@ class QiskitDynamicsTestCase(unittest.TestCase):
 
     def assertAllClose(self, A, B, rtol=1e-8, atol=1e-8):
         """Call np.allclose and assert true."""
+
+        self.assertTrue(np.allclose(A, B, rtol=rtol, atol=atol))
+
+    def assertAllCloseSparse(self, A, B, rtol=1e-8, atol=1e-8):
+        """Call np.allclose and assert true. Converts A and B to arrays and then calls np.allclose.
+        Assumes that A and B are either sparse matrices or lists of sparse matrices"""
+
+        if isinstance(A, spmatrix):
+            A = A.toarray()
+            B = B.toarray()
+        elif isinstance(A, Iterable) and isinstance(A[0], spmatrix):
+            A = [item.toarray() for item in A]
+            B = [item.toarray() for item in B]
+
         self.assertTrue(np.allclose(A, B, rtol=rtol, atol=atol))
 
 
@@ -81,3 +102,20 @@ class TestJaxBase(unittest.TestCase):
         wf = wrap(lambda f: jit(grad(f)), decorator=True)
         f = lambda *args: np.sum(func_to_test(*args)).real
         return wf(f)
+
+
+class TestQutipBase(unittest.TestCase):
+    """Base class with setUpClass and tearDownClass for setting jax as the
+    default backend.
+
+    Test cases that inherit from this class will automatically work with jax
+    backend.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            # pylint: disable=import-outside-toplevel
+            import qutip
+        except Exception as err:
+            raise unittest.SkipTest("Skipping qutip tests.") from err

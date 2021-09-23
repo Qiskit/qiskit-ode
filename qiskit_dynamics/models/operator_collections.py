@@ -20,7 +20,7 @@ import numpy as np
 from qiskit.quantum_info.operators.operator import Operator
 from scipy.sparse.csr import csr_matrix
 from qiskit_dynamics.dispatch import Array
-from qiskit_dynamics.type_utils import to_array, vec_commutator, vec_dissipator
+from qiskit_dynamics.type_utils import to_array, to_csr, vec_commutator, vec_dissipator
 
 
 class BaseOperatorCollection(ABC):
@@ -137,13 +137,13 @@ class SparseOperatorCollection(BaseOperatorCollection):
             decimals: Values will be rounded at ``decimals`` places after decimal.
                 Avoids storing excess sparse entries for entries close to zero."""
         if isinstance(drift, Operator):
-            drift = to_array(drift)
+            drift = to_csr(drift)
         self.drift = np.round(drift, decimals)
         self._operators = np.empty(shape=len(operators), dtype="O")
         # pylint: disable=consider-using-enumerate
         for i in range(len(operators)):
             if isinstance(operators[i], Operator):
-                operators[i] = to_array(operators[i])
+                operators[i] = to_csr(operators[i])
             self._operators[i] = csr_matrix(np.round(operators[i], decimals))
 
     @property

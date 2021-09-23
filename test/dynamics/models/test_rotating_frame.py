@@ -17,6 +17,7 @@ import numpy as np
 
 from qiskit import QiskitError
 from qiskit.quantum_info.operators import Operator
+from scipy.sparse.csr import csr_matrix
 from qiskit_dynamics.models.rotating_frame import RotatingFrame
 from qiskit_dynamics.dispatch import Array
 from ..common import QiskitDynamicsTestCase, TestJaxBase
@@ -460,6 +461,107 @@ class TestRotatingFrame(QiskitDynamicsTestCase):
         op2 = rotating_frame.vectorized_frame_basis @ op.flatten(order="F")
 
         self.assertAllClose(op1, op2.reshape((6, 6), order="F"))
+
+
+class TestRotatingFrameTypeHandling(QiskitDynamicsTestCase):
+    def test_state_transformations_no_frame_csr_matrix_type(self):
+        """Test frame transformations with no frame."""
+
+        # rotating_frame = RotatingFrame(Array(np.zeros(2)))
+        rotating_frame = RotatingFrame(None)
+
+        t = 0.123
+        y = csr_matrix([1.0, 1j])
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+
+        t = 100.12498
+        # y = Array(np.eye(2))
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+
+    def test_state_transformations_no_frame_qobj_type(self):
+        """Test frame transformations with no frame."""
+
+        try:
+            import qutip
+        except:
+            return
+        rotating_frame = RotatingFrame(None)
+
+        t = 0.123
+        y = qutip.Qobj([[1.0, 1]])
+        out = rotating_frame.state_into_frame(t, y)
+        # self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+        out = rotating_frame.state_out_of_frame(t, y)
+        # self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+
+        t = 100.12498
+        y = csr_matrix(np.eye(2))
+        out = rotating_frame.state_into_frame(t, y)
+        # self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+        out = rotating_frame.state_out_of_frame(t, y)
+        # self.assertAllCloseSparse(out, y)
+        assert isinstance(out, csr_matrix)
+
+    def test_state_transformations_no_frame_Operator_types(self):
+        """Test frame transformations with no frame."""
+
+        # rotating_frame = RotatingFrame(Array(np.zeros(2)))
+        rotating_frame = RotatingFrame(None)
+
+        t = 0.123
+        y = Operator([1.0, 1j])
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, np.ndarray)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, np.ndarray)
+
+        t = 100.12498
+        y = Operator(np.eye(2))
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, np.ndarray)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, np.ndarray)
+
+    def test_state_transformations_no_frame_array_type(self):
+        """Test frame transformations with no frame."""
+
+        # rotating_frame = RotatingFrame(Array(np.zeros(2)))
+        rotating_frame = RotatingFrame(None)
+
+        t = 0.123
+        y = Array([1.0, 1j])
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, Array)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, Array)
+
+        t = 100.12498
+        y = Array(np.eye(2))
+        out = rotating_frame.state_into_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, Array)
+        out = rotating_frame.state_out_of_frame(t, y)
+        self.assertAllClose(out, y)
+        assert isinstance(out, Array)
 
 
 class TestFrameJax(TestRotatingFrame, TestJaxBase):
