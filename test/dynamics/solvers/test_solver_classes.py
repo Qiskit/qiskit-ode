@@ -107,14 +107,14 @@ class TestSolver(QiskitDynamicsTestCase):
         self.ham_solver = Solver(
             hamiltonian_operators=[X],
             hamiltonian_signals=[Signal(1.0, 5.0)],
-            drift=5 * Z,
+            static_hamiltonian=5 * Z,
             rotating_frame=5 * Z,
         )
 
         self.rwa_ham_solver = Solver(
             hamiltonian_operators=[X],
             hamiltonian_signals=[Signal(1.0, 5.0)],
-            drift=5 * Z,
+            static_hamiltonian=5 * Z,
             rotating_frame=5 * Z,
             rwa_cutoff_freq=2 * 5.0,
         )
@@ -123,7 +123,7 @@ class TestSolver(QiskitDynamicsTestCase):
             hamiltonian_operators=[X],
             hamiltonian_signals=[Signal(1.0, 5.0)],
             dissipator_operators=[0.01 * X],
-            drift=5 * Z,
+            static_hamiltonian=5 * Z,
             rotating_frame=5 * Z,
         )
 
@@ -131,7 +131,7 @@ class TestSolver(QiskitDynamicsTestCase):
             hamiltonian_operators=[X],
             hamiltonian_signals=[Signal(1.0, 5.0)],
             dissipator_operators=[0.01 * X],
-            drift=5 * Z,
+            static_hamiltonian=5 * Z,
             rotating_frame=5 * Z,
             evaluation_mode="dense_vectorized",
         )
@@ -141,7 +141,7 @@ class TestSolver(QiskitDynamicsTestCase):
             hamiltonian_operators=[X],
             hamiltonian_signals=[Signal(1.0, 5.0)],
             dissipator_operators=[0.0 * X],
-            drift=5 * Z,
+            static_hamiltonian=5 * Z,
             rotating_frame=5 * Z,
             evaluation_mode="dense_vectorized",
         )

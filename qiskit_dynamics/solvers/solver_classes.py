@@ -59,7 +59,7 @@ class Solver:
     Transformations on the model can be specified via the optional arguments:
 
     * ``rotating_frame``: Transforms the model into a rotating frame. Note that
-      operator specifying the frame will be substracted from the drift.
+      operator specifying the frame will be substracted from the static_hamiltonian.
       See :class:`~qiskit_dynamics.models.RotatingFrame` for details.
     * ``rwa_cutoff_freq``: Performs a rotating wave approximation (RWA) on the model
       with cutoff frequency ``rwa_cutoff_freq``. See
@@ -85,7 +85,7 @@ class Solver:
         hamiltonian_signals: Optional[Union[List[Signal], SignalList]] = None,
         dissipator_operators: Optional[Array] = None,
         dissipator_signals: Optional[Union[List[Signal], SignalList]] = None,
-        drift: Optional[Array] = None,
+        static_hamiltonian: Optional[Array] = None,
         rotating_frame: Optional[Union[Array, RotatingFrame]] = None,
         evaluation_mode: Optional[str] = "dense",
         rwa_cutoff_freq: Optional[float] = None,
@@ -98,8 +98,8 @@ class Solver:
             dissipator_operators: Optional dissipation operators.
             dissipator_signals: Optional time-dependent coefficients for the dissipators. If
                                 ``None``, coefficients are assumed to be the constant ``1.``.
-            drift: Hamiltonian drift operator. If a ``rotating_frame`` is specified, the
-                   ``frame_operator`` will be subtracted from the drift.
+            static_hamiltonian: Constant Hamiltonian term. If a ``rotating_frame`` is specified, the
+                   ``frame_operator`` will be subtracted from the static_hamiltonian.
             rotating_frame: Rotating frame to transform the model into.
             evaluation_mode: Method for model evaluation. See documentation for
                              ``HamiltonianModel.evaluation_mode`` or
@@ -115,7 +115,7 @@ class Solver:
                 operators=hamiltonian_operators,
                 signals=hamiltonian_signals,
                 rotating_frame=rotating_frame,
-                drift=drift,
+                static_operator=static_hamiltonian,
                 evaluation_mode=evaluation_mode,
             )
             self._signals = hamiltonian_signals
@@ -126,7 +126,7 @@ class Solver:
                 dissipator_operators=dissipator_operators,
                 dissipator_signals=dissipator_signals,
                 rotating_frame=rotating_frame,
-                drift=drift,
+                static_hamiltonian=static_hamiltonian,
                 evaluation_mode=evaluation_mode,
             )
             self._signals = (hamiltonian_signals, dissipator_signals)

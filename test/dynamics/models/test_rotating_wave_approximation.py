@@ -40,7 +40,7 @@ class TestRotatingWave(QiskitDynamicsTestCase):
         self.assertAllClose(sigs(0), np.array([-1, -1, 3]))
         ops = np.array([[[0, 1], [1, 0]], [[0, -1j], [1j, 0]], [[1, 0], [0, -1]]])
 
-        GM = GeneratorModel(ops, drift=None, signals=sigs, rotating_frame=frame_op)
+        GM = GeneratorModel(ops, static_operator=None, signals=sigs, rotating_frame=frame_op)
         self.assertAllClose(GM(0), np.array([[3 - 4j, -1], [-1 - 2j, -3 - 2j]]))
         self.assertAllClose(
             GM(1),
@@ -66,9 +66,9 @@ class TestRotatingWave(QiskitDynamicsTestCase):
         ops = Array(np.ones((4, 2, 2)))
         sigs = [Signal(1, 0), Signal(1, -3, 0), Signal(1, 1), Signal(1, 3, 0)]
         dft = Array(np.ones((2, 2)))
-        GM = GeneratorModel(ops, signals=sigs, drift=dft, rotating_frame=None)
+        GM = GeneratorModel(ops, signals=sigs, static_operator=dft, rotating_frame=None)
         GMP = rotating_wave_approximation(GM, 2)
-        self.assertAllClose(GMP.get_drift(True), Array(np.ones((2, 2))))
+        self.assertAllClose(GMP.get_static_operator(True), Array(np.ones((2, 2))))
         post_rwa_ops = Array(np.array([1, 0, 1, 0, 0, 0, 0, 0]).reshape((8, 1, 1))) * Array(
             np.ones((8, 2, 2))
         )
@@ -81,7 +81,7 @@ class TestRotatingWave(QiskitDynamicsTestCase):
         ops = Array(np.ones((4, 2, 2)))
         sigs = [Signal(1, 0), Signal(1, -3, 0), Signal(1, 1), Signal(1, 3, 0)]
         dft = Array(np.ones((2, 2)))
-        GM = GeneratorModel(ops, signals=sigs, drift=dft, rotating_frame=None)
+        GM = GeneratorModel(ops, signals=sigs, static_operator=dft, rotating_frame=None)
         f = rotating_wave_approximation(GM, 100, return_signal_map=True)[1]
         vals = f(sigs).complex_value(3)
         self.assertAllClose(vals[:4], GM.signals.complex_value(3))
@@ -162,7 +162,7 @@ class TestRotatingWaveJax(TestRotatingWave, TestJaxBase):
             sigs = [Signal(1, 0), Signal(lambda t: w * t, -3, 0), Signal(1, 1), Signal(1, 3, 0)]
             ops = Array(np.ones((4, 2, 2)))
             dft = Array(np.ones((2, 2)))
-            GM = GeneratorModel(ops, signals=sigs, drift=dft, rotating_frame=None)
+            GM = GeneratorModel(ops, signals=sigs, static_operator=dft, rotating_frame=None)
             return rotating_wave_approximation(GM, 2)(2)
 
         self.jit_wrap(_simple_function_using_rwa)(1.0)

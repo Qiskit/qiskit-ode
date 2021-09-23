@@ -66,13 +66,13 @@ class TestLMDEGeneratorModelSetup(QiskitDynamicsTestCase):
         self.ham_model = HamiltonianModel(
             operators=[Operator.from_label("X")],
             signals=[Signal(1.0, 5.0)],
-            drift=Operator.from_label("Z"),
+            static_operator=Operator.from_label("Z"),
         )
 
         self.lindblad_model = LindbladModel(
             hamiltonian_operators=[Operator.from_label("X")],
             hamiltonian_signals=[Signal(1.0, 5.0)],
-            drift=Operator.from_label("Z"),
+            static_hamiltonian=Operator.from_label("Z"),
             dissipator_operators=[Operator.from_label("Y")],
         )
 
@@ -287,7 +287,7 @@ class Testsolve_lmde_Base(QiskitDynamicsTestCase):
         dim = 7
         b = 0.5
         rng = np.random.default_rng(3093)
-        drift = rng.uniform(low=-b, high=b, size=(dim, dim)) + 1j * rng.uniform(
+        static_operator = rng.uniform(low=-b, high=b, size=(dim, dim)) + 1j * rng.uniform(
             low=-b, high=b, size=(dim, dim)
         )
         operators = rng.uniform(low=-b, high=b, size=(1, dim, dim)) + 1j * rng.uniform(
@@ -305,7 +305,10 @@ class Testsolve_lmde_Base(QiskitDynamicsTestCase):
             samples=rng.uniform(low=-b, high=b, size=(5,)), dt=0.1, carrier_freq=1.0
         )
         model = GeneratorModel(
-            operators=operators, signals=[sig], drift=drift, rotating_frame=frame_op
+            operators=operators,
+            signals=[sig],
+            static_operator=static_operator,
+            rotating_frame=frame_op,
         )
 
         results = solve_lmde(model, t_span=[0, 0.5], y0=y0, method=method, max_dt=0.01)
@@ -313,7 +316,7 @@ class Testsolve_lmde_Base(QiskitDynamicsTestCase):
 
         # simulate directly out of frame
         def generator(t):
-            return drift + sig(t) * operators[0]
+            return static_operator + sig(t) * operators[0]
 
         results2 = solve_lmde(generator, t_span=[0, 0.5], y0=y0, method=method, max_dt=0.01)
 

@@ -108,7 +108,7 @@ class Testsolve_ode_Base(QiskitDynamicsTestCase):
         dim = 7
         b = 0.5
         rng = np.random.default_rng(3093)
-        drift = rng.uniform(low=-b, high=b, size=(dim, dim)) + 1j * rng.uniform(
+        static_operator = rng.uniform(low=-b, high=b, size=(dim, dim)) + 1j * rng.uniform(
             low=-b, high=b, size=(dim, dim)
         )
         operators = rng.uniform(low=-b, high=b, size=(1, dim, dim)) + 1j * rng.uniform(
@@ -126,7 +126,10 @@ class Testsolve_ode_Base(QiskitDynamicsTestCase):
             samples=rng.uniform(low=-b, high=b, size=(5,)), dt=0.1, carrier_freq=1.0
         )
         model = GeneratorModel(
-            operators=operators, signals=[sig], drift=drift, rotating_frame=frame_op
+            operators=operators,
+            signals=[sig],
+            static_operator=static_operator,
+            rotating_frame=frame_op,
         )
 
         results = solve_ode(model, t_span=[0, 0.5], y0=y0, method=method, atol=1e-8, rtol=1e-8)
@@ -134,7 +137,7 @@ class Testsolve_ode_Base(QiskitDynamicsTestCase):
 
         # simulate directly out of frame
         def rhs(t, y):
-            return (drift + sig(t) * operators[0]) @ y
+            return (static_operator + sig(t) * operators[0]) @ y
 
         results2 = solve_ode(rhs, t_span=[0, 0.5], y0=y0, method=method, atol=1e-8, rtol=1e-8)
         # check consistency - this is relatively low tolerance due to the solver tolerance

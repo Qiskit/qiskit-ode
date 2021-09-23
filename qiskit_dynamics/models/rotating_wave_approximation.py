@@ -19,7 +19,6 @@ from typing import List, Optional, Union
 import numpy as np
 from qiskit_dynamics.models import (
     BaseGeneratorModel,
-    CallableGenerator,
     GeneratorModel,
     HamiltonianModel,
     LindbladModel,
@@ -92,12 +91,8 @@ def rotating_wave_approximation(
         GeneratorModel with twice as many terms, and, if return_signal_map,
         also the function f.
     Raises:
-        NotImplementedError: If a ``CallableGenerator`` is passed.
         ValueError: If the model has no signals.
     """
-
-    if isinstance(model, CallableGenerator):
-        raise NotImplementedError("RWA for CallableGenerators is not supported.")
 
     if model.signals is None:
         raise ValueError("Model must have nontrivial signals to perform the RWA.")
@@ -118,11 +113,12 @@ def rotating_wave_approximation(
             frame_shift = 1j * frame_shift
     else:
         frame_shift = 0
-    cur_drift = model.get_drift(True) + frame_shift  # undo frame shifting for RWA
-    rwa_drift = cur_drift * (abs(frame_freqs) < cutoff_freq).astype(int)
-    rwa_drift = model.rotating_frame.operator_out_of_frame_basis(rwa_drift)
 
     if isinstance(model, GeneratorModel):
+        cur_drift = model.get_static_operator(True) + frame_shift  # undo frame shifting for RWA
+        rwa_drift = cur_drift * (abs(frame_freqs) < cutoff_freq).astype(int)
+        rwa_drift = model.rotating_frame.operator_out_of_frame_basis(rwa_drift)
+
         rwa_operators = get_rwa_operators(
             model.get_operators(True), model.signals, model.rotating_frame, frame_freqs, cutoff_freq
         )
@@ -132,7 +128,7 @@ def rotating_wave_approximation(
         rwa_model = model.__class__(
             rwa_operators,
             rwa_signals,
-            drift=rwa_drift,
+            static_operator=rwa_drift,
             rotating_frame=model.rotating_frame,
             evaluation_mode=model.evaluation_mode,
         )
@@ -141,6 +137,9 @@ def rotating_wave_approximation(
         return rwa_model
 
     elif isinstance(model, LindbladModel):
+        cur_drift = model.get_static_hamiltonian(True) + frame_shift  # undo frame shifting for RWA
+        rwa_drift = cur_drift * (abs(frame_freqs) < cutoff_freq).astype(int)
+        rwa_drift = model.rotating_frame.operator_out_of_frame_basis(rwa_drift)
 
         cur_ham_ops, cur_dis_ops = model.get_operators(in_frame_basis=True)
         cur_ham_sig, cur_dis_sig = model.signals
@@ -161,7 +160,7 @@ def rotating_wave_approximation(
             hamiltonian_signals=rwa_ham_sig,
             dissipator_operators=rwa_dis_ops,
             dissipator_signals=rwa_dis_sig,
-            drift=rwa_drift,
+            static_hamiltonian=rwa_drift,
             rotating_frame=model.rotating_frame,
             evaluation_mode=model.evaluation_mode,
         )

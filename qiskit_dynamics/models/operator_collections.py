@@ -30,21 +30,26 @@ class BaseOperatorCollection(ABC):
     which is assumed to be decomposed as
     :math:`\Lambda(c, y) = \Lambda_d(y) + \sum_jc_j\Lambda_j(y)`
     for linear maps :math:`\Lambda_d` and :math:`\Lambda_j`, with
-    :math:`\Lambda_d` referred to as the "drift" component.
+    :math:`\Lambda_d` referred to as the static component.
 
     Describes an interface for evaluating the map or its action on ``y``,
     given the 1d set of values :math:`c_j`.
     """
 
     @property
-    def drift(self) -> Array:
-        """Returns drift part of operator collection."""
-        return self._drift
+    def static_operator(self) -> Array:
+        """Returns static part of operator collection."""
+        return self._static_operator
 
-    @drift.setter
-    def drift(self, new_drift: Optional[Array] = None):
-        """Sets drift term."""
-        self._drift = new_drift
+    @static_operator.setter
+    def static_operator(self, new_static_operator: Optional[Array] = None):
+        """Sets static_operator term."""
+        self._static_operator = new_static_operator
+
+    @property
+    def operators(self) -> Array:
+        """Return operators."""
+        return self._operators
 
     @property
     @abstractmethod
@@ -93,15 +98,15 @@ class DenseOperatorCollection(BaseOperatorCollection):
     def __init__(
         self,
         operators: Union[Array, List[Operator]],
-        drift: Optional[Union[Array, Operator]] = None,
+        static_operator: Optional[Union[Array, Operator]] = None,
     ):
         """Initialize.
         Args:
             operators: (k,n,n) Array specifying the terms :math:`G_j`.
-            drift: (n,n) Array specifying the extra drift :math:`G_d`.
+            static_operator: (n,n) Array specifying the extra static_operator :math:`G_d`.
         """
         self._operators = to_array(operators)
-        self.drift = to_array(drift)
+        self.static_operator = to_array(static_operator)
 
     @property
     def num_operators(self) -> int:
@@ -109,10 +114,10 @@ class DenseOperatorCollection(BaseOperatorCollection):
 
     def evaluate(self, signal_values: Array) -> Array:
         r"""Evaluate the affine combination of matrices."""
-        if self._drift is None:
+        if self._static_operator is None:
             return np.tensordot(signal_values, self._operators, axes=1)
         else:
-            return np.tensordot(signal_values, self._operators, axes=1) + self._drift
+            return np.tensordot(signal_values, self._operators, axes=1) + self._static_operator
 
     def evaluate_rhs(self, signal_values: Array, y: Array) -> Array:
         """Evaluates the function."""
@@ -125,7 +130,7 @@ class SparseOperatorCollection(BaseOperatorCollection):
     def __init__(
         self,
         operators: Union[Array, List[Operator]],
-        drift: Optional[Union[Array, Operator]] = None,
+        static_operator: Optional[Union[Array, Operator]] = None,
         decimals: Optional[int] = 10,
     ):
         """
@@ -133,12 +138,12 @@ class SparseOperatorCollection(BaseOperatorCollection):
 
         Args:
             operators: (k,n,n) Array specifying the terms :math:`G_j`.
-            drift: (n,n) Array specifying the drift term :math:`G_d`.
+            static_operator: (n,n) Array specifying the static_operator term :math:`G_d`.
             decimals: Values will be rounded at ``decimals`` places after decimal.
                 Avoids storing excess sparse entries for entries close to zero."""
-        if isinstance(drift, Operator):
-            drift = to_array(drift)
-        self.drift = np.round(drift, decimals)
+        if isinstance(static_operator, Operator):
+            static_operator = to_array(static_operator)
+        self.static_operator = np.round(static_operator, decimals)
         self._operators = np.empty(shape=len(operators), dtype="O")
         # pylint: disable=consider-using-enumerate
         for i in range(len(operators)):
@@ -151,15 +156,15 @@ class SparseOperatorCollection(BaseOperatorCollection):
         return self._operators.shape[0]
 
     @property
-    def drift(self) -> Array:
-        return super().drift
+    def static_operator(self) -> Array:
+        return super().static_operator
 
-    @drift.setter
-    def drift(self, new_drift):
-        if isinstance(new_drift, csr_matrix):
-            self._drift = new_drift
+    @static_operator.setter
+    def static_operator(self, new_static_operator):
+        if isinstance(new_static_operator, csr_matrix):
+            self._static_operator = new_static_operator
         else:
-            self._drift = csr_matrix(new_drift)
+            self._static_operator = csr_matrix(new_static_operator)
 
     def evaluate(self, signal_values: Array) -> csr_matrix:
         r"""Sparse version of ``DenseOperatorCollection.evaluate``.
@@ -170,23 +175,23 @@ class SparseOperatorCollection(BaseOperatorCollection):
         Returns:
             Generator as sparse array."""
         signal_values = signal_values.reshape(1, signal_values.shape[-1])
-        if self._drift is None:
+        if self._static_operator is None:
             return np.tensordot(signal_values, self._operators, axes=1)[0]
         else:
-            return np.tensordot(signal_values, self._operators, axes=1)[0] + self._drift
+            return np.tensordot(signal_values, self._operators, axes=1)[0] + self._static_operator
 
     def evaluate_rhs(self, signal_values: Array, y: Array) -> Array:
         if len(y.shape) == 2:
             # For y a matrix with y[:,i] storing the i^{th} state, it is faster to
             # first evaluate the generator in most cases
-            gen = np.tensordot(signal_values, self._operators, axes=1) + self.drift
+            gen = np.tensordot(signal_values, self._operators, axes=1) + self.static_operator
             out = gen.dot(y)
         elif len(y.shape) == 1:
             # for y a vector, it is typically faster to use the following, very
             # strange-looking implementation
             tmparr = np.empty(shape=(1), dtype="O")
             tmparr[0] = y
-            out = np.dot(signal_values, self._operators * tmparr) + self.drift.dot(y)
+            out = np.dot(signal_values, self._operators * tmparr) + self.static_operator.dot(y)
         return out
 
 
@@ -207,7 +212,7 @@ class DenseLindbladCollection(BaseOperatorCollection):
     def __init__(
         self,
         hamiltonian_operators: Union[Array, List[Operator]],
-        drift: Union[Array, Operator],
+        static_hamiltonian: Union[Array, Operator],
         dissipator_operators: Optional[Union[Array, List[Operator]]] = None,
     ):
         r"""Initialization.
@@ -216,7 +221,7 @@ class DenseLindbladCollection(BaseOperatorCollection):
             hamiltonian_operators: Specifies breakdown of Hamiltonian
                                    as :math:`H(t) = H_d + \sum_j c_j H_j` by specifying
                                    :math:`H_j`. (k,n,n) array.
-            drift: Treated as a constant term :math:`H_d` to be added to the
+            static_hamiltonian: Treated as a constant term :math:`H_d` to be added to the
                    Hamiltonian of the system.
             dissipator_operators: the terms :math:`L_j` in Lindblad equation.
                                   (m,n,n) Array.
@@ -231,7 +236,27 @@ class DenseLindbladCollection(BaseOperatorCollection):
             self._dissipator_products = np.matmul(
                 self._dissipator_operators_conj, self._dissipator_operators
             )
-        self.drift = to_array(drift)
+        self.static_hamiltonian = to_array(static_hamiltonian)
+
+    @property
+    def static_operator(self) -> Array:
+        """What to do with this?***********************************************************************."""
+        pass
+
+    @static_operator.setter
+    def static_operator(self, new_static_operator: Optional[Array] = None):
+        """What to do with this?***********************************************************************."""
+        pass
+
+    @property
+    def static_hamiltonian(self) -> Array:
+        """Returns static part of operator collection."""
+        return self._static_hamiltonian
+
+    @static_hamiltonian.setter
+    def static_hamiltonian(self, new_static_hamiltonian: Optional[Array] = None):
+        """Sets static_operator term."""
+        self._static_hamiltonian = new_static_hamiltonian
 
     @property
     def num_operators(self):
@@ -248,7 +273,10 @@ class DenseLindbladCollection(BaseOperatorCollection):
         Returns:
             Hamiltonian matrix.
         """
-        return np.tensordot(signal_values, self._hamiltonian_operators, axes=1) + self.drift
+        return (
+            np.tensordot(signal_values, self._hamiltonian_operators, axes=1)
+            + self.static_hamiltonian
+        )
 
     def evaluate_rhs(self, ham_sig_vals: Array, dis_sig_vals: Array, y: Array) -> Array:
         r"""Evaluates Lindblad equation RHS given a pair of signal values
@@ -317,7 +345,7 @@ class DenseVectorizedLindbladCollection(DenseOperatorCollection):
     def __init__(
         self,
         hamiltonian_operators: Union[Array, List[Operator]],
-        drift: Union[Array, Operator],
+        static_hamiltonian: Union[Array, Operator],
         dissipator_operators: Optional[Union[Array, List[Operator]]] = None,
     ):
         r"""Initialize.
@@ -325,13 +353,14 @@ class DenseVectorizedLindbladCollection(DenseOperatorCollection):
         Args:
             hamiltonian_operators: Specifies breakdown of Hamiltonian
                 as :math:`H(t) = \sum_j s(t) H_j+H_d` by specifying H_j. (k,n,n) Array.
-            drift: Constant term to be added to the Hamiltonian of the system. (n,n) Array.
+            static_hamiltonian: Constant term to be added to the Hamiltonian of the system.
+                                (n,n) Array.
             dissipator_operators: the terms :math:`L_j` in Lindblad equation. (m,n,n) Array.
         """
 
         # Convert Hamiltonian to commutator formalism
         vec_ham_ops = -1j * vec_commutator(to_array(hamiltonian_operators))
-        vec_drift = -1j * vec_commutator(to_array(drift))
+        vec_static_hamiltonian = -1j * vec_commutator(to_array(static_hamiltonian))
         total_ops = None
         if dissipator_operators is not None:
             vec_diss_ops = vec_dissipator(to_array(dissipator_operators))
@@ -341,7 +370,19 @@ class DenseVectorizedLindbladCollection(DenseOperatorCollection):
             total_ops = vec_ham_ops
             self.empty_dissipators = True
 
-        super().__init__(total_ops, drift=vec_drift)
+        self._static_hamiltonian = static_hamiltonian
+
+        super().__init__(total_ops, static_operator=vec_static_hamiltonian)
+
+    @property
+    def static_hamiltonian(self) -> Array:
+        """Returns static part of operator collection."""
+        return self._static_hamiltonian
+
+    @static_hamiltonian.setter
+    def static_hamiltonian(self, new_static_hamiltonian: Optional[Array] = None):
+        """Sets static_operator term."""
+        self._static_hamiltonian = new_static_hamiltonian
 
     def evaluate_rhs(self, ham_sig_vals: Array, dis_sig_vals: Array, y: Array) -> Array:
         r"""Evaluates the RHS of the Lindblad equation using
@@ -396,7 +437,7 @@ class SparseVectorizedLindbladCollection(SparseOperatorCollection):
     def __init__(
         self,
         hamiltonian_operators: Union[Array, List[Operator]],
-        drift: Union[Array, Operator],
+        static_hamiltonian: Union[Array, Operator],
         dissipator_operators: Optional[Union[Array, List[Operator]]] = None,
     ):
         r"""Initialize.
@@ -404,13 +445,14 @@ class SparseVectorizedLindbladCollection(SparseOperatorCollection):
         Args:
             hamiltonian_operators: Specifies breakdown of Hamiltonian
                 as :math:`H(t) = \sum_j s(t) H_j+H_d` by specifying H_j. (k,n,n) Array.
-            drift: Constant term to be added to the Hamiltonian of the system. (n,n) Array.
+            static_hamiltonian: Constant term to be added to the Hamiltonian of the system.
+                                (n,n) Array.
             dissipator_operators: the terms :math:`L_j` in Lindblad equation. (m,n,n) Array.
         """
 
         # Convert Hamiltonian to commutator formalism
         vec_ham_ops = -1j * vec_commutator(hamiltonian_operators)
-        vec_drift = -1j * vec_commutator(drift)
+        vec_static_hamiltonian = -1j * vec_commutator(static_hamiltonian)
         total_ops = None
         if dissipator_operators is not None:
             vec_diss_ops = vec_dissipator(to_array(dissipator_operators))
@@ -420,7 +462,18 @@ class SparseVectorizedLindbladCollection(SparseOperatorCollection):
             total_ops = vec_ham_ops
             self.empty_dissipators = True
 
-        super().__init__(total_ops, drift=vec_drift)
+        self._static_hamiltonian = static_hamiltonian
+        super().__init__(total_ops, static_operator=vec_static_hamiltonian)
+
+    @property
+    def static_hamiltonian(self) -> Array:
+        """Returns static part of operator collection."""
+        return self._static_hamiltonian
+
+    @static_hamiltonian.setter
+    def static_hamiltonian(self, new_static_hamiltonian: Optional[Array] = None):
+        """Sets static_operator term."""
+        self._static_hamiltonian = new_static_hamiltonian
 
     def evaluate_rhs(self, ham_sig_vals: Array, dis_sig_vals: Array, y: Array) -> Array:
         r"""Evaluates the RHS of the Lindblad equation using
@@ -476,7 +529,7 @@ class SparseLindbladCollection(DenseLindbladCollection):
     def __init__(
         self,
         hamiltonian_operators: Union[Array, List[Operator]],
-        drift: Union[Array, Operator],
+        static_hamiltonian: Union[Array, Operator],
         dissipator_operators: Optional[Union[Array, List[Operator]]] = None,
         decimals: Optional[int] = 10,
     ):
@@ -485,7 +538,8 @@ class SparseLindbladCollection(DenseLindbladCollection):
         Args:
             hamiltonian_operators: Specifies breakdown of Hamiltonian
                 as :math:`H(t) = \sum_j s(t) H_j+H_d` by specifying H_j. (k,n,n) array.
-            drift: Constant term :math:`H_d` to be added to the Hamiltonian of the system.
+            static_hamiltonian: Constant term :math:`H_d` to be added to the Hamiltonian of the
+                                system.
             dissipator_operators: the terms :math:`L_j` in Lindblad equation. (m,n,n) array.
             decimals: operator values will be rounded to ``decimals`` places after the
                 decimal place to avoid excess storage of near-zero values
@@ -500,9 +554,9 @@ class SparseLindbladCollection(DenseLindbladCollection):
             self._hamiltonian_operators[i] = csr_matrix(
                 np.round(hamiltonian_operators[i], decimals)
             )
-        if isinstance(drift, Operator):
-            drift = to_array(drift)
-        self.drift = csr_matrix(np.round(drift, decimals))
+        if isinstance(static_hamiltonian, Operator):
+            static_hamiltonian = to_array(static_hamiltonian)
+        self.static_hamiltonian = csr_matrix(np.round(static_hamiltonian, decimals))
         if dissipator_operators is not None:
             self._dissipator_operators = np.empty(shape=len(dissipator_operators), dtype="O")
             self._dissipator_operators_conj = np.empty_like(self._dissipator_operators)
@@ -520,8 +574,20 @@ class SparseLindbladCollection(DenseLindbladCollection):
         else:
             self._dissipator_operators = None
 
+    @property
+    def static_hamiltonian(self) -> Array:
+        """Returns static part of operator collection."""
+        return self._static_hamiltonian
+
+    @static_hamiltonian.setter
+    def static_hamiltonian(self, new_static_hamiltonian: Optional[Array] = None):
+        """Sets static_operator term."""
+        self._static_hamiltonian = new_static_hamiltonian
+
     def evaluate_hamiltonian(self, signal_values: Array) -> csr_matrix:
-        return np.sum(signal_values * self._hamiltonian_operators, axis=-1) + self.drift
+        return (
+            np.sum(signal_values * self._hamiltonian_operators, axis=-1) + self.static_hamiltonian
+        )
 
     def evaluate_rhs(self, ham_sig_vals: Array, dis_sig_vals: Array, y: Array) -> Array:
         r"""Evaluates the RHS of the LindbladModel for a given list of signal values.

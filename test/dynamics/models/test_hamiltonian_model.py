@@ -16,11 +16,45 @@
 import numpy as np
 
 from scipy.linalg import expm
+
+from qiskit import QiskitError
 from qiskit.quantum_info.operators import Operator
 from qiskit_dynamics.models import HamiltonianModel
 from qiskit_dynamics.signals import Signal, SignalList
 from qiskit_dynamics.dispatch import Array
 from ..common import QiskitDynamicsTestCase, TestJaxBase
+
+
+class TestHamiltonianModelValidation(QiskitDynamicsTestCase):
+    """Test validation handling of HamiltonianModel."""
+
+    def test_operators_not_hermitian(self):
+        """Test raising error if operators are not Hermitian."""
+
+        operators = [np.array([[0.0, 1.0], [0.0, 0.0]])]
+
+        with self.assertRaises(QiskitError) as qe:
+            HamiltonianModel(operators=operators)
+        self.assertTrue("operators must be Hermitian." in str(qe.exception))
+
+    def test_static_operator_not_hermitian(self):
+        """Test raising error if static_operator is not Hermitian."""
+
+        static_operator = np.array([[0.0, 1.0], [0.0, 0.0]])
+        operators = [np.array([[0.0, 1.0], [1.0, 0.0]])]
+
+        with self.assertRaises(QiskitError) as qe:
+            HamiltonianModel(operators=operators, static_operator=static_operator)
+        self.assertTrue("static_operator must be Hermitian." in str(qe.exception))
+
+    def test_validate_false(self):
+        """Verify setting validate=False avoids error raising."""
+
+        ham_model = HamiltonianModel(
+            operators=[np.array([[0.0, 1.0], [0.0, 0.0]])], signals=[1.0], validate=False
+        )
+
+        self.assertAllClose(ham_model(1.0), -1j * np.array([[0.0, 1.0], [0.0, 0.0]]))
 
 
 class TestHamiltonianModel(QiskitDynamicsTestCase):
@@ -205,7 +239,9 @@ class TestHamiltonianModel(QiskitDynamicsTestCase):
 
             sig_list.append(Signal(get_env_func(), freq, phase))
         sig_list = SignalList(sig_list)
-        model = HamiltonianModel(operators, drift=None, signals=sig_list, rotating_frame=frame_op)
+        model = HamiltonianModel(
+            operators, static_operator=None, signals=sig_list, rotating_frame=frame_op
+        )
 
         value = model(1.0, in_frame_basis=False) / -1j
         coeffs = np.real(coefficients * np.exp(1j * 2 * np.pi * carriers * 1.0 + 1j * phases))
