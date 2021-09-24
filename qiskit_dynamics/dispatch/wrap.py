@@ -30,22 +30,6 @@ def wrap(func: Callable, wrap_return: bool = True, decorator: bool = False) -> C
 
     Returns:
         Callable: The wrapped function.
-
-    .. note::
-
-        Setting ``decorator=True`` requires that the signature of the
-        function being wrapped is ``func(f: Callable, ...) -> Callable``.
-        Using it is equivalent to nested wrapping
-
-        .. code-block:: python
-
-            f_wrapped = wrap(func, decorator=True)(f)
-
-        is equivalent to
-
-        .. code-block:: python
-
-            f_wrapped = wrap(wrap(func)(f))
     """
     # pylint: disable=protected-access
 

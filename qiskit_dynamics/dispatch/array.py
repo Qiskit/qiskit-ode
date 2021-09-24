@@ -1,6 +1,6 @@
 # This code is part of Qiskit.
 #
-# (C) Copyright IBM 2017, 2020.
+# (C) Copyright IBM 2020.
 #
 # This code is licensed under the Apache License, Version 2.0. You may
 # obtain a copy of this license in the LICENSE.txt file in the root directory
@@ -29,22 +29,6 @@ class Array(NDArrayOperatorsMixin):
 
     This class provides a Numpy compatible wrapper to supported Python
     array libraries. Supported backends are 'numpy' and 'jax'.
-
-    **Numpy compatibility**
-
-    This class is compatible with Numpy functions and will handle dispatching
-    to the correct corresponding function for the current Array backend if
-    one is supported.
-
-    **Attributes and Methods**
-
-    This class implements two custom attributes
-        * :attr`data` which returns the wrapped array object
-        * :attr`backend` which returns the backend string of hte wrapped array.
-
-    All other attributes and methods of the wrapped array are accessable
-    through this class, but with any array return types wrapped into Array
-    objects.
     """
 
     def __init__(
