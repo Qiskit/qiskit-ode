@@ -9,7 +9,7 @@ models of quantum systems.
   :maxdepth: 1
 
   Tutorials <tutorials/index>
-  How-to Guides <howto/index>
+  User Guide <userguide/index>
   API References <apidocs/index>
   Discussions <discussions/index>
   Release Notes <release_notes>
