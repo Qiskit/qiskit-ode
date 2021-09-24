@@ -34,6 +34,8 @@ where
     * :math:`\nu \in \mathbb{R}` is the *carrier frequency*, and
     * :math:`\phi \in \mathbb{R}` is the *phase*.
 
+Furthermore, this module contains *transfer functions* which transform one or more signal
+into other signals.
 
 Signal API summary
 ==================
@@ -166,6 +168,37 @@ sampling just the envelope (and keeping the carrier analog).
                           title='Signal v.s. Sampled envelope')
 
 
+Transfer Functions
+==================
+
+A transfer function is a mapping from one or more :class:`Signal` to one or more :class:`Signal`.
+Transfer functions can, for example, be used to model the effect of the electronics finite
+response. The code below shows the example of an :class:`IQMixer`. Here, two signals modulated at
+100 MHz and with a relative :math:`\pi/2` phase shift are passed through an IQ-mixer with a
+carrier frequency of 400 MHz to create a signal at 500 MHz. Note that the code below does not make
+any assumptions about the time and frequency units which we interpret as ns and GHz, respectively.
+
+.. jupyter-execute::
+
+    import numpy as np
+    from qiskit_dynamics.signals import DiscreteSignal, Sampler, IQMixer
+
+    dt = 0.25
+    in_phase = DiscreteSignal(dt, [1.0]*200, carrier_freq=0.1, phase=0)
+    quadrature = DiscreteSignal(dt, [1.0]*200, carrier_freq=0.1, phase=np.pi/2)
+
+    sampler = Sampler(dt/25, 5000)
+    in_phase = sampler(in_phase)
+    quadrature = sampler(quadrature)
+
+    mixer = IQMixer(0.4)
+    rf = mixer(in_phase, quadrature)
+
+    fig, axs = plt.subplots(1, 2, figsize=(14, 4))
+    in_phase.draw(0, 25, 100, axis=axs[0])
+    quadrature.draw(0, 25, 100, axis=axs[0], title='In-phase and quadrature signals')
+    rf.draw(0, 24, 2000, axis=axs[1], title='Mixer output')
+
 Signal Classes
 ==============
 
@@ -178,8 +211,8 @@ Signal Classes
    DiscreteSignalSum
    SignalList
 
-Transfer Functions
-==================
+Transfer Function Classes
+=========================
 
 .. autosummary::
    :toctree: ../stubs/

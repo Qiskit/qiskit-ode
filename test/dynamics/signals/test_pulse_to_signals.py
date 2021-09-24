@@ -28,7 +28,7 @@ from qiskit.pulse import (
     Constant,
     Waveform,
 )
-from qiskit_dynamics.converters import InstructionToSignals
+from qiskit_dynamics.pulse import InstructionToSignals
 from qiskit_dynamics.signals import DiscreteSignal
 
 from ..common import QiskitDynamicsTestCase

@@ -31,13 +31,20 @@ from qiskit_dynamics.signals import DiscreteSignal
 
 
 class InstructionToSignals:
-    """Converts pulse instructions to Signals for the Aer simulator."""
+    """Converts pulse instructions to Signals to be used in models.
+
+    The :class:`InstructionsToSignals` class converts a pulse schedule to a list
+    of signals that can be given to a model. This conversion is done by calling
+    the :meth:`get_signals` method on a schedule.
+    """
 
     def __init__(self, dt: float, carriers: List[float] = None):
-        """
+        """Initialize pulse schedule to signals converter.
 
         Args:
-            dt: length of the samples.
+            dt: length of the samples. This is required by the converter as pulse
+                schedule are specified in units of dt and typically do not carry the
+                value of dt with them.
             carriers: a list of carrier frequencies. If it is not None there
                 must be at least as many carrier frequencies as there are
                 channels in the schedules that will be converted.

@@ -28,5 +28,5 @@ from .solvers.solver_classes import Solver
 
 from . import models
 from . import signals
-from . import converters
+from . import pulse
 from . import dispatch
