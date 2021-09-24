@@ -12,16 +12,32 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-r"""
-=======================================================
-Array Dispatch Module (:mod:`qiskit_dynamics.dispatch`)
-=======================================================
+"""
+=================================================
+Dispatch Module (:mod:`qiskit_dynamics.dispatch`)
+=================================================
 
 .. currentmodule:: qiskit_dynamics.dispatch
 
 This module contains an :class:`Array` class that wraps N-dimensional array
 objects from different libraries for use with Numpy functions through a common
-interface.
+interface and functions for working with Array objects and other libraries.
+
+Contents
+========
+
+.. autosummary::
+    :toctree: ../stubs/
+
+    Array
+    wrap
+    set_default_backend
+    default_backend
+    available_backends
+    backend_types
+    asarray
+    requires_backend
+
 
 Array Class
 ===========
@@ -108,22 +124,6 @@ The :meth:`Array.__init__` method has optional kwargs
 * ``backend`` (``str``): The array backend to use. If not specified this
   will be inferred from the input data type if it is a backend array
   instance, otherwise it will be the :func:`default_backend`.
-
-Array Backend Functions
------------------------
-
-The dispatch module includes several utility functions for working with arrays
-from different array backend libraries
-
-.. autosummary::
-    :toctree: ../stubs/
-
-    set_default_backend
-    default_backend
-    available_backends
-    backend_types
-    asarray
-    requires_backend
 
 
 Using Arrays with other Libraries

@@ -1,12 +1,7 @@
-.. _qiskit-dynamics-guide:
+.. _qiskit-dynamics-userguide:
 
-.. module:: qiskit_dynamics_guide
+.. module:: qiskit_dynamics_userguide
 
 ==========================
 Qiskit Dynamics User Guide
 ==========================
-
-.. toctree::
-   :maxdepth: 3
-
-   dispatch
