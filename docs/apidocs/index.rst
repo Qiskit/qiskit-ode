@@ -13,3 +13,4 @@ Qiskit Dynamics API Reference
    models
    signals
    converters
+   dispatch
