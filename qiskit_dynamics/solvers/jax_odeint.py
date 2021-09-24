@@ -60,9 +60,9 @@ def jax_odeint(
     t_direction = np.sign(Array(t_list[-1] - t_list[0], backend="jax")).data
 
     results = odeint(
-        lambda y, t: t_direction * rhs(t_direction * t, y),
-        y0=y0,
-        t=t_direction * t_list.data,
+        lambda y, t: t_direction * Array(rhs(t_direction * t, y)).data,
+        y0=Array(y0).data,
+        t=t_direction * Array(t_list).data,
         **kwargs,
     )
 

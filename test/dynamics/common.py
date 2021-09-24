@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 from qiskit_dynamics import dispatch
-from qiskit_dynamics.dispatch import wrap
+from qiskit_dynamics.dispatch import Array, wrap
 
 
 class QiskitDynamicsTestCase(unittest.TestCase):
@@ -32,6 +32,8 @@ class QiskitDynamicsTestCase(unittest.TestCase):
 
     def assertAllClose(self, A, B, rtol=1e-8, atol=1e-8):
         """Call np.allclose and assert true."""
+        A = Array(A)
+        B = Array(B)
         self.assertTrue(np.allclose(A, B, rtol=rtol, atol=atol))
 
 
@@ -68,7 +70,7 @@ class TestJaxBase(unittest.TestCase):
             Wrapped and jitted function."""
         wf = wrap(jit, decorator=True)
         # pylint: disable=unnecessary-lambda
-        return wf(lambda *args: func_to_test(*args))
+        return wf(wrap(func_to_test))
 
     def jit_grad_wrap(self, func_to_test: Callable) -> Callable:
         """Tests whether a function can be graded. Converts
@@ -80,4 +82,4 @@ class TestJaxBase(unittest.TestCase):
             JIT-compiled gradient of function."""
         wf = wrap(lambda f: jit(grad(f)), decorator=True)
         f = lambda *args: np.sum(func_to_test(*args)).real
-        return wf(f)
+        return wf(wrap(f))

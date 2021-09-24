@@ -227,7 +227,7 @@ class RotatingFrame:
             out = self.state_into_frame_basis(out)
 
         # go into the frame using fast diagonal matrix multiplication
-        out = (np.exp(-t * self.frame_diag) * out.transpose()).transpose()  # = e^{tF}out
+        out = (np.exp(self.frame_diag * (-t)) * out.transpose()).transpose()  # = e^{tF}out
 
         # if output is requested to not be in the frame basis, convert it
         if not return_in_frame_basis:
@@ -318,7 +318,7 @@ class RotatingFrame:
         # get frame transformation matrix in diagonal basis
         # assumption that F is anti-Hermitian implies conjugation of
         # diagonal gives inversion
-        exp_freq = np.exp(t * self.frame_diag)
+        exp_freq = np.exp(self.frame_diag * t)
         frame_mat = exp_freq.conj().reshape(self.dim, 1) * exp_freq
         if issparse(out):
             out = out.multiply(frame_mat)

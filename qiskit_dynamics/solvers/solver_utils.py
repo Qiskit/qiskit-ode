@@ -37,7 +37,7 @@ def is_lindblad_model_not_vectorized(obj: any) -> bool:
 
 def merge_t_args(
     t_span: Union[List, Tuple, Array], t_eval: Optional[Union[List, Tuple, Array]] = None
-) -> Array:
+) -> Union[List, Tuple, Array]:
     """Merge ``t_span`` and ``t_eval`` into a single array without
     duplicates. Validity of the passed ``t_span`` and ``t_eval``
     follow scipy ``solve_ivp`` validation logic:
@@ -48,19 +48,21 @@ def merge_t_args(
     Note: this is done explicitly with ``numpy``, and hence this is
     not differentiable or compilable using jax.
 
+    If ``t_eval is None`` returns ``t_span`` with no modification.
+
     Args:
         t_span: Interval to solve over.
         t_eval: Time points to include in returned results.
 
     Returns:
-        Array: Combined list of times.
+        Union[List, Tuple, Array]: Combined list of times.
 
     Raises:
         ValueError: If one of several validation checks fail.
     """
 
     if t_eval is None:
-        return Array(t_span)
+        return t_span
 
     t_span = Array(t_span, backend="numpy")
 

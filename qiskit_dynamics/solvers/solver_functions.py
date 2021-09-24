@@ -111,7 +111,6 @@ def solve_ode(
     ):
         raise QiskitError("Method " + str(method) + " not supported by solve_ode.")
 
-    t_span = Array(t_span)
     y0 = Array(y0)
 
     if isinstance(rhs, BaseGeneratorModel):
@@ -226,7 +225,6 @@ def solve_lmde(
                vectorized evaluation mode."""
         )
 
-    t_span = Array(t_span)
     y0 = Array(y0)
 
     # setup generator and rhs functions to pass to numerical methods

@@ -21,7 +21,7 @@ from qiskit import QiskitError
 from qiskit.quantum_info.operators import Operator
 from qiskit_dynamics.models import CallableGenerator, GeneratorModel, RotatingFrame
 from qiskit_dynamics.signals import Signal, SignalList
-from qiskit_dynamics.dispatch import Array
+from qiskit_dynamics.dispatch import Array, wrap
 from ..common import QiskitDynamicsTestCase, TestJaxBase
 
 
@@ -82,8 +82,8 @@ class TestGeneratorModel(QiskitDynamicsTestCase):
 
         # manually evaluate frame
         expected = (
-            i2pi * self.w * U @ self.Z.data @ U.conj().transpose() / 2
-            + d_coeff * i2pi * U @ self.X.data @ U.conj().transpose() / 2
+            i2pi * self.w * U @ self.Z @ U.conj().transpose() / 2
+            + d_coeff * i2pi * U @ self.X @ U.conj().transpose() / 2
             - frame_operator
         )
 
@@ -109,7 +109,7 @@ class TestGeneratorModel(QiskitDynamicsTestCase):
         self.basic_model.rotating_frame = frame_op
 
         # get the frame basis that is used in model
-        _, U = np.linalg.eigh(1j * frame_op)
+        _, U = wrap(np.linalg.eigh)(1j * frame_op)
 
         t = 3.21412
         value = self.basic_model(t, in_frame_basis=True)
@@ -311,7 +311,7 @@ class TestGeneratorModel(QiskitDynamicsTestCase):
 
         farr = Array(np.array([[3j, 2j], [2j, 0]]))
         farr2 = Array(np.array([[1j, 2], [-2, 3j]]))
-        evals, evect = np.linalg.eig(farr)
+        evals, evect = wrap(np.linalg.eig)(farr)
         diafarr = np.diag(evals)
 
         paulis_in_frame_basis = np.conjugate(np.transpose(evect)) @ paulis @ evect
@@ -403,7 +403,7 @@ class TestGeneratorModel(QiskitDynamicsTestCase):
         t = 2
 
         farr = Array(np.array([[3j, 2j], [2j, 0]]))
-        evals, evect = np.linalg.eig(farr)
+        evals, evect = wrap(np.linalg.eig)(farr)
         diafarr = np.diag(evals)
 
         paulis_in_frame_basis = np.conjugate(np.transpose(evect)) @ paulis @ evect
@@ -514,7 +514,7 @@ class TestGeneratorModelJax(TestGeneratorModel, TestJaxBase):
         """Tests whether all functions are jitable.
         Checks if having a frame makes a difference, as well as
         all jax-compatible evaluation_modes."""
-        self.jit_wrap(self.basic_model.evaluate)(1)
+        self.jit_wrap(self.basic_model.evaluate)(1.)
         self.jit_wrap(self.basic_model.evaluate_rhs)(1, Array(np.array([0.2, 0.4])))
 
         self.basic_model.rotating_frame = Array(np.array([[3j, 2j], [2j, 0]]))

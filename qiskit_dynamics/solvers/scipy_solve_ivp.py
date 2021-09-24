@@ -77,7 +77,7 @@ def scipy_solve_ivp(
         rhs = real_rhs(rhs)
         y0 = c2r(y0)
 
-    results = solve_ivp(rhs, t_span=t_span.data, y0=y0.data, t_eval=t_eval, method=method, **kwargs)
+    results = solve_ivp(rhs, t_span=t_span, y0=y0.data, t_eval=t_eval, method=method, **kwargs)
     if embed_real:
         results.y = r2c(results.y)
 

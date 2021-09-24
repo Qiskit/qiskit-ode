@@ -462,7 +462,7 @@ class TestRotatingFrame(QiskitDynamicsTestCase):
         self.assertAllClose(op1, op2.reshape((6, 6), order="F"))
 
 
-class TestFrameJax(TestRotatingFrame, TestJaxBase):
+class TestRotatingFrameJax(TestRotatingFrame, TestJaxBase):
     """Jax version of TestRotatingFrame tests.
 
     Note: This class has more tests due to inheritance.
@@ -484,3 +484,19 @@ class TestFrameJax(TestRotatingFrame, TestJaxBase):
 
         rotating_frame = RotatingFrame(self.Z + 1j * self.X)
         self.assertTrue(jnp.isnan(rotating_frame.frame_diag[0]))
+
+    def test_jitting(self):
+        """Test jitting of state_into_frame and _conjugate_and_add."""
+
+        rotating_frame = RotatingFrame(Array([1., -1.]))
+
+        self.jit_wrap(rotating_frame.state_into_frame)(t=0.1, y=np.array([0., 1.]))
+        self.jit_wrap(rotating_frame._conjugate_and_add)(t=0.1, y=np.array([[0., 1.], [1., 0.]]))
+
+    def test_jit_and_grad(self):
+        """Test jitting and gradding of state_into_frame and _conjugate_and_add."""
+
+        rotating_frame = RotatingFrame(Array([1., -1.]))
+
+        self.jit_grad_wrap(rotating_frame.state_into_frame)(t=0.1, y=np.array([0., 1.]))
+        self.jit_grad_wrap(rotating_frame._conjugate_and_add)(t=0.1, y=np.array([[0., 1.], [1., 0.]]))
