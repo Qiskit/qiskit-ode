@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    The data type of memory data produced by :class:`~.DynamicsBackend` for
+    measurement level 1 was changed from a Numpy array to a list in order to
+    match the type documented for the ``ExperimentResultData`` class in Qiskit.
+    To get the old Numpy format back, it is sufficient to call ``numpy.array``
+    on the result data.

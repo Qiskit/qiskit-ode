@@ -920,7 +920,7 @@ def default_experiment_result_function(
             measurement_data = np.average(measurement_data, axis=0)
 
         # construct results object
-        exp_data = ExperimentResultData(memory=measurement_data)
+        exp_data = ExperimentResultData(memory=measurement_data.tolist())
         return ExperimentResult(
             shots=backend.options.shots,
             success=True,
