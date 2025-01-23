@@ -22,22 +22,21 @@ requirements = [
     "qiskit",
     "multiset>=3.0.1",
     "sympy>=1.12",
-    "arraylias"
+    "arraylias",
 ]
 
-jax_extras = ['jax', 'jaxlib']
+jax_extras = ["jax", "jaxlib"]
 
-PACKAGES = setuptools.find_packages(exclude=['test*'])
+PACKAGES = setuptools.find_packages(exclude=["test*"])
 
 version_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'qiskit_dynamics',
-                 'VERSION.txt'))
+    os.path.join(os.path.dirname(__file__), "qiskit_dynamics", "VERSION.txt")
+)
 
-with open(version_path, 'r') as fd:
+with open(version_path, "r") as fd:
     version = fd.read().rstrip()
 
-README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                           'README.md')
+README_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), "README.md")
 with open(README_PATH) as readme_file:
     README = readme_file.read()
 
@@ -47,7 +46,7 @@ setuptools.setup(
     packages=PACKAGES,
     description="Qiskit ODE solver",
     long_description=README,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="https://github.com/Qiskit-Community/qiskit-dynamics",
     author="Qiskit Development Team",
     author_email="qiskit@us.ibm.com",
@@ -75,8 +74,6 @@ setuptools.setup(
     install_requires=requirements,
     include_package_data=True,
     python_requires=">=3.10",
-    extras_require={
-        "jax": jax_extras
-    },
-    zip_safe=False
+    extras_require={"jax": jax_extras},
+    zip_safe=False,
 )

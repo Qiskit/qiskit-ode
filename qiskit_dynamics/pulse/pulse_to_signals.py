@@ -22,7 +22,7 @@ from warnings import warn
 import numpy as np
 import sympy as sym
 
-from qiskit.pulse import (
+from qiskit_dynamics.pulse import (
     Schedule,
     Play,
     ShiftPhase,
@@ -35,8 +35,8 @@ from qiskit.pulse import (
     ControlChannel,
     AcquireChannel,
 )
-from qiskit.pulse.exceptions import PulseError
-from qiskit.pulse.library import SymbolicPulse
+from qiskit_dynamics.pulse.exceptions import PulseError
+from qiskit_dynamics.pulse.library import SymbolicPulse
 from qiskit import QiskitError
 
 from qiskit_dynamics import DYNAMICS_NUMPY as unp
@@ -56,9 +56,9 @@ class InstructionToSignals:
 
     The :class:`InstructionsToSignals` class converts a pulse schedule to a list of signals that can
     be given to a model. This conversion is done by calling the :meth:`get_signals` method on a
-    schedule. The converter applies to instances of :class:`~qiskit.pulse.Schedule`. Instances of
-    :class:`~qiskit.pulse.ScheduleBlock` must first be converted to :class:`~qiskit.pulse.Schedule`
-    using the :func:`~qiskit.pulse.transforms.block_to_schedule` function in Qiskit Pulse.
+    schedule. The converter applies to instances of :class:`~qiskit_dynamics.pulse.Schedule`. Instances of
+    :class:`~qiskit_dynamics.pulse.ScheduleBlock` must first be converted to :class:`~qiskit_dynamics.pulse.Schedule`
+    using the :func:`~qiskit_dynamics.pulse.transforms.block_to_schedule` function in Qiskit Pulse.
 
     The converter can be initialized with the optional arguments ``carriers`` and ``channels``. When
     ``channels`` is given, only the signals specified by name in ``channels`` are returned. The
@@ -148,9 +148,9 @@ class InstructionToSignals:
 
         Args:
             schedule: The schedule to represent in terms of signals. Instances of
-                :class:`~qiskit.pulse.ScheduleBlock` must first be converted to
-                :class:`~qiskit.pulse.Schedule` using the
-                :func:`~qiskit.pulse.transforms.block_to_schedule` function in Qiskit Pulse.
+                :class:`~qiskit_dynamics.pulse.ScheduleBlock` must first be converted to
+                :class:`~qiskit_dynamics.pulse.Schedule` using the
+                :func:`~qiskit_dynamics.pulse.transforms.block_to_schedule` function in Qiskit Pulse.
 
         Returns:
             A list of :class:`.DiscreteSignal` instances.

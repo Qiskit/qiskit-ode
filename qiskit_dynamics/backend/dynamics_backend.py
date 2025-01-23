@@ -27,13 +27,13 @@ import copy
 import numpy as np
 from scipy.integrate._ivp.ivp import OdeResult
 
-from qiskit import pulse
+from qiskit_dynamics import pulse
 from qiskit.qobj.utils import MeasLevel, MeasReturnType
 from qiskit.qobj.common import QobjHeader
 from qiskit.transpiler import Target, InstructionProperties
 from qiskit.circuit.library import Measure
-from qiskit.pulse import Schedule, ScheduleBlock
-from qiskit.pulse.transforms.canonicalization import block_to_schedule
+from qiskit_dynamics.pulse import Schedule, ScheduleBlock
+from qiskit_dynamics.pulse.transforms.canonicalization import block_to_schedule
 from qiskit.providers.options import Options
 from qiskit.providers.backend import BackendV1, BackendV2
 from qiskit.providers.models.pulsedefaults import PulseDefaults
@@ -86,7 +86,7 @@ class DynamicsBackend(BackendV2):
         )
 
     Without further configuration, the above ``backend`` can be used to simulate either
-    :class:`~qiskit.pulse.Schedule` or :class:`~qiskit.pulse.ScheduleBlock` instances.
+    :class:`~qiskit_dynamics.pulse.Schedule` or :class:`~qiskit_dynamics.pulse.ScheduleBlock` instances.
 
     Pulse-level simulations defined in terms of :class:`~qiskit.circuit.QuantumCircuit` instances
     can also be performed if each gate in the circuit has a corresponding pulse-level definition,
@@ -351,7 +351,7 @@ class DynamicsBackend(BackendV2):
         validate: Optional[bool] = True,
     ) -> Union[OdeResult, List[OdeResult]]:
         """Simulate a list of :class:`~qiskit.circuit.QuantumCircuit`,
-        :class:`~qiskit.pulse.Schedule`, or :class:`~qiskit.pulse.ScheduleBlock` instances and
+        :class:`~qiskit_dynamics.pulse.Schedule`, or :class:`~qiskit_dynamics.pulse.ScheduleBlock` instances and
         return the ``OdeResult``.
 
         This method is analogous to :meth:`.Solver.solve`, however it additionally utilizes

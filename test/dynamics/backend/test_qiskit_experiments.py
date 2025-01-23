@@ -17,7 +17,7 @@ Integration tests that ensure this module interacts properly with qiskit-experim
 
 import numpy as np
 
-from qiskit import pulse
+from qiskit_dynamics import pulse
 from qiskit.circuit import Parameter
 from qiskit.circuit.library import XGate, SXGate
 from qiskit.transpiler import Target
