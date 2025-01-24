@@ -1106,12 +1106,14 @@ def _get_backend_channel_freqs(
 
     for channel in drive_channels:
         idx = int(channel[1:])
+        # pylint: disable=possibly-used-before-assignment
         if idx >= len(drive_frequencies):
             raise QiskitError(f"DriveChannel index {idx} is out of bounds.")
         channel_freqs[channel] = drive_frequencies[idx]
 
     for channel in meas_channels:
         idx = int(channel[1:])
+        # pylint: disable=possibly-used-before-assignment
         if idx >= len(meas_frequencies):
             raise QiskitError(f"MeasureChannel index {idx} is out of bounds.")
         channel_freqs[channel] = meas_frequencies[idx]

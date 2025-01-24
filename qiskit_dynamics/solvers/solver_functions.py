@@ -366,6 +366,7 @@ def solve_lmde(
     # convert results to correct basis if necessary
     if isinstance(generator, BaseGeneratorModel):
         if not model_in_frame_basis:
+            # pylint: disable=possibly-used-before-assignment
             results.y = results_y_out_of_frame_basis(generator, results.y, y0.ndim)
 
         generator.in_frame_basis = model_in_frame_basis
