@@ -882,7 +882,7 @@ def default_experiment_result_function(
 
         # construct results object
         exp_data = ExperimentResultData(
-            counts=counts, memory=memory_samples if backend.options.memory else None
+            counts=counts, memory=memory_samples.tolist() if backend.options.memory else None
         )
         return ExperimentResult(
             shots=backend.options.shots,

@@ -136,7 +136,7 @@ def _get_memory_slot_probabilities(
                 level = str(max_outcome_value)
             memory_slot_result[-(idx + 1)] = level
 
-        memory_slot_result = "".join(memory_slot_result)
+        memory_slot_result = hex(int("".join(memory_slot_result), 2))
         if memory_slot_result in memory_slot_probs:
             memory_slot_probs[memory_slot_result] += prob
         else:
