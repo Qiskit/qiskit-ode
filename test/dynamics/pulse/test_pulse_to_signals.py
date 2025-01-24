@@ -23,7 +23,7 @@ from qiskit.pulse import Schedule
 from qiskit.pulse.transforms.canonicalization import block_to_schedule
 from qiskit import QiskitError
 
-from qiskit_ibm_runtime.fake_provider import FakeQuito
+from qiskit_ibm_runtime.fake_provider import FakeQuitoV2
 
 try:
     from jax import jit
@@ -345,7 +345,7 @@ class TestPulseToSignals(QiskitDynamicsTestCase):
         """Test correct parsing of schedule with barrier instructions."""
 
         # this example needs any backend with at least 2 qubits
-        backend = FakeQuito()
+        backend = FakeQuitoV2()
 
         with pulse.build(backend) as sched_block:
             pulse.play(pulse.Constant(duration=3, amp=0.5), pulse.DriveChannel(0))
