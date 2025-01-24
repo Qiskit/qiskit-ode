@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Setting of the ``num_qubits`` ``Target`` attribute in ``DynamicsBackend`` initialization has
+    been removed. Users will now need to set this at ``Target`` instantiation if needed.

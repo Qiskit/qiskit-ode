@@ -216,7 +216,6 @@ class DynamicsBackend(BackendV2):
             target.add_instruction(Measure(), measure_properties)
 
         target.dt = solver._dt
-        target.num_qubits = len(self.options.subsystem_dims)
 
         self._target = target
 
