@@ -30,7 +30,9 @@ Dynamics.
 
 First, configure JAX to run on CPU in 64 bit mode.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     # configure jax to use 64 bit mode
     import jax
@@ -48,7 +50,9 @@ Gaussian pulse to use in optimization, we need to instantiate a
 :class:`~qiskit.pulse.library.ScalableSymbolicPulse` with a Gaussian parameterization. First, define
 the symbolic representation in `sympy`.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit import pulse
     from qiskit_dynamics.pulse import InstructionToSignals
@@ -75,7 +79,9 @@ the symbolic representation in `sympy`.
 
 Next, define the :class:`~qiskit.pulse.library.ScalableSymbolicPulse` using the above expression.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     _t, _duration, _amp, _sigma, _angle = sym.symbols("t, duration, amp, sigma, angle")
     _center = _duration / 2
@@ -105,7 +111,9 @@ Using a Gaussian pulse as an example, we show that a function involving
 :class:`~qiskit.pulse.library.ScalableSymbolicPulse` and the pulse to signal converter can be
 JAX-compiled (or more generally, JAX-transformed).
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     # use amplitude as the function argument
     def jit_func(amp):

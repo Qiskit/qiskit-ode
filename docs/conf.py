@@ -30,13 +30,13 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.extlinks',
-    'jupyter_sphinx',
     'sphinx_autodoc_typehints',
     'reno.sphinxext',
     'sphinx.ext.intersphinx',
     'nbsphinx',
     'sphinxcontrib.bibtex',
     "qiskit_sphinx_theme",
+    "matplotlib.sphinxext.plot_directive",
 ]
 templates_path = ["_templates"]
 

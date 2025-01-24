@@ -28,14 +28,16 @@ when using a JAX solver method. Here we configure JAX to run on CPU in 64 bit mo
 :ref:`User Guide entry on using different array libraries with Qiskit Dynamics <how-to use different
 array libraries>` for more information.
 
-.. jupyter-execute::
-    :hide-code:
+.. plot::
+    :context: close-figs
 
     # a parallelism warning raised by JAX is being raised due to somethign outside of Dynamics
     import warnings
     warnings.filterwarnings("ignore", message="os.fork")
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     # Configure JAX
     import jax
@@ -68,7 +70,9 @@ where
 - :math:`N_0` and :math:`N_1` are the number operators for qubits :math:`0` and :math:`1`
   respectively.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import numpy as np
     
@@ -118,7 +122,9 @@ outcomes of :meth:`.DynamicsBackend.run` are independent of the choice of rotati
 :class:`.Solver`, and as such we are free to choose the rotating frame that provides the best
 performance.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_dynamics import Solver
     
@@ -146,7 +152,9 @@ Furthermore, note that in the solver options we set the max step size to the pul
 ``dt`` via the ``"hmax"`` argument for the method ``"jax_odeint"``. This is important for preventing
 variable step solvers from accidentally stepping over pulses in schedules with long idle times.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_dynamics import DynamicsBackend
     
@@ -182,12 +190,13 @@ that the usual instructions work on the :class:`.DynamicsBackend`.
     impact on the returned results.
 
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
-    %%time
-    
+    import time
     from qiskit import pulse
-    
+
     sigma = 128
     num_samples = 256
     
@@ -207,20 +216,28 @@ that the usual instructions work on the :class:`.DynamicsBackend`.
                 pulse.acquire(duration=1, qubit_or_channel=0, register=pulse.MemorySlot(0))
             
         schedules.append(schedule)
-        
+    
+    start_time = time.time()
+
     job = backend.run(schedules, shots=100)
     result = job.result()
 
+    print(f"Run time: {time.time() - start_time}")
+
 Visualize one of the schedules.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     schedules[3].draw()
 
 Retrieve the counts for one of the experiments as would be done using the results object from a real
 backend.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     result.get_counts(3)
 
@@ -238,7 +255,9 @@ contained in the :class:`.DynamicsBackend`.
 Build a simple circuit. Here we build one consisting of a single Hadamard gate on qubit :math:`0`,
 followed by measurement.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit import QuantumCircuit
     
@@ -252,7 +271,9 @@ Next, attach a calibration for the Hadamard gate on qubit :math:`0` to the circu
 we are only demonstrating the mechanics of adding a calibration; we have not attempted to calibrate
 the schedule to implement the Hadamard gate with high fidelity.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     with pulse.build() as h_q0:
         pulse.play(
@@ -264,10 +285,16 @@ the schedule to implement the Hadamard gate with high fidelity.
 
 Call run on the circuit, and get counts as usual.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
-    %time res = backend.run(circ).result()
+    start_time = time.time()
     
+    res = backend.run(circ).result()
+    
+    print(f"Run time: {time.time() - start_time}")
+
     res.get_counts(0)
 
 4.2 Simulating circuits via gate definitions in the backend :class:`~qiskit.transpiler.Target`
@@ -277,7 +304,9 @@ Alternatively to the above work flow, add the above schedule as the pulse-level 
 Hadamard gate on qubit :math:`0` to `backend.target`, which impacts how jobs are transpiled for the
 backend. See the :class:`~qiskit.transpiler.Target` class documentation for further information.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit.circuit.library import HGate
     from qiskit.transpiler import InstructionProperties
@@ -287,15 +316,23 @@ backend. See the :class:`~qiskit.transpiler.Target` class documentation for furt
 Rebuild the same circuit, however this time we do not need to add the calibration for the Hadamard
 gate to the circuit object.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     circ2 = QuantumCircuit(1, 1)
     circ2.h(0)
     circ2.measure([0], [0])
     
-    %time result = backend.run(circ2).result()
+    start_time = time.time()
 
-.. jupyter-execute::
+    result = backend.run(circ2).result()
+
+    print(f"Run time: {time.time() - start_time}")
+
+.. plot::
+    :context: close-figs
+    :include-source:
 
     result.get_counts(0)
 
@@ -324,7 +361,9 @@ To enable running of the single qubit experiments, we add the following to the `
   be utilizing it, this ensures that validation steps checking that the device is fully connected 
   will pass.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit.circuit.library import XGate, SXGate, RZGate, CXGate
     from qiskit.circuit import Parameter
@@ -364,7 +403,9 @@ object. Here we use the
 :class:`~qiskit_experiments.calibration_management.basis_gate_library.FixedFrequencyTransmon`
 template library to initialize our calibrations.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import pandas as pd
     from qiskit_experiments.calibration_management.calibrations import Calibrations
@@ -380,7 +421,9 @@ template library to initialize our calibrations.
 Next, run a rough amplitude calibration for ``X`` and ``SX`` gates for both qubits. First, build the
 experiments.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_experiments.library.calibration import RoughXSXAmplitudeCal
     
@@ -392,25 +435,36 @@ experiments.
 
 Run the Rabi experiments.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
-    %%time
+    start_time = time.time()
+
     rabi0_data = rabi0.run().block_for_results()
     rabi1_data = rabi1.run().block_for_results()
 
+    print(f"Run time: {time.time() - start_time}")
+
 Plot the results.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     rabi0_data.figure(0)
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     rabi1_data.figure(0)
 
 Observe the updated parameters for qubit 0.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     pd.DataFrame(**cals.parameters_table(qubit_list=[0, ()], parameters="amp"))
 
@@ -420,7 +474,9 @@ Observe the updated parameters for qubit 0.
 Run rough Drag parameter calibration for the ``X`` and ``SX`` gates. This follows the same procedure
 as above.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_experiments.library.calibration import RoughDragCal
     
@@ -432,24 +488,35 @@ as above.
     
     cal_drag0.circuits()[5].draw(output="mpl")
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
-    %%time
+    start_time = time.time()
+
     drag0_data = cal_drag0.run().block_for_results()
     drag1_data = cal_drag1.run().block_for_results()
 
-.. jupyter-execute::
+    print(f"Run time: {time.time() - start_time}")
+
+.. plot::
+    :context: close-figs
+    :include-source:
 
     drag0_data.figure(0)
 
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     drag1_data.figure(0)
 
 The updated calibrations object:
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     pd.DataFrame(**cals.parameters_table(qubit_list=[0, ()], parameters="amp"))
 
@@ -463,7 +530,9 @@ channel map, which is a dictionary mapping control-target qubit index pairs (giv
 the control channel index used to drive the corresponding cross-resonance interaction. This is
 required by the experiment to determine which channel to drive for each control-target pair.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
     
     # set the control channel map
     backend.set_options(control_channel_map={(0, 1): 0, (1, 0): 1})
@@ -471,7 +540,9 @@ required by the experiment to determine which channel to drive for each control-
 Build the characterization experiment object, and update gate definitions in ``target`` with the
 values for the single qubit gates calibrated above.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_experiments.library import CrossResonanceHamiltonian
 
@@ -483,17 +554,27 @@ values for the single qubit gates calibrated above.
     
     backend.target.update_from_instruction_schedule_map(cals.get_inst_map())
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     cr_ham_experiment.circuits()[10].draw("mpl")
 
 Run the simulation.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
-    %time data_cr = cr_ham_experiment.run().block_for_results()
+    start_time = time.time()
+
+    data_cr = cr_ham_experiment.run().block_for_results()
+
+    print(f"Run time: {time.time() - start_time}")
 
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     data_cr.figure(0)
