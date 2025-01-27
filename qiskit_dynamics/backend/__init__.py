@@ -21,8 +21,8 @@ Backend (:mod:`qiskit_dynamics.backend`)
 
 This module contains the :class:`.DynamicsBackend` class, which provides a
 :class:`~qiskit.providers.backend.BackendV2` interface for running pulse-level simulations with
-Qiskit Dynamics. The :class:`.DynamicsBackend` can directly simulate :class:`~qiskit.pulse.Schedule`
-and :class:`~qiskit.pulse.ScheduleBlock` instances, and can also be configured to simulate
+Qiskit Dynamics. The :class:`.DynamicsBackend` can directly simulate :class:`~qiskit_dynamics.pulse.Schedule`
+and :class:`~qiskit_dynamics.pulse.ScheduleBlock` instances, and can also be configured to simulate
 :class:`~qiskit.circuit.QuantumCircuit`\s at the pulse-level via circuit to pulse transpilation.
 
 This module also exposes some functions utilized by :class:`.DynamicsBackend` that may be of use to

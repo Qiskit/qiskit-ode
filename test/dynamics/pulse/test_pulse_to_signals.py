@@ -19,8 +19,8 @@ import numpy as np
 import sympy as sym
 
 from qiskit import pulse
-from qiskit.pulse import Schedule
-from qiskit.pulse.transforms.canonicalization import block_to_schedule
+from qiskit_dynamics.pulse import Schedule
+from qiskit_dynamics.pulse.transforms.canonicalization import block_to_schedule
 from qiskit import QiskitError
 
 from qiskit_ibm_runtime.fake_provider import FakeQuitoV2

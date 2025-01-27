@@ -23,7 +23,7 @@ from scipy.integrate._ivp.ivp import OdeResult
 from scipy.sparse import csr_matrix
 from scipy.linalg import expm
 
-from qiskit import QiskitError, pulse, QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit import QiskitError, QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.circuit.library import XGate, UnitaryGate, Measure
 from qiskit.transpiler import Target, InstructionProperties
 from qiskit.quantum_info import Statevector, DensityMatrix, Operator, SuperOp
@@ -31,7 +31,7 @@ from qiskit.result.models import ExperimentResult, ExperimentResultData
 from qiskit.providers.models.backendconfiguration import UchannelLO
 from qiskit.providers.backend import QubitProperties
 
-from qiskit_dynamics import Solver, DynamicsBackend
+from qiskit_dynamics import Solver, DynamicsBackend, pulse
 from qiskit_dynamics.backend import default_experiment_result_function
 from qiskit_dynamics.backend.dynamics_backend import (
     _get_acquire_instruction_timings,
