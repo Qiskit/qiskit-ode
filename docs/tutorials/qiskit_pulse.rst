@@ -32,7 +32,9 @@ steps:
 
 First, we use the pulse module in Qiskit to create a pulse schedule.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import numpy as np
     import qiskit.pulse as pulse
@@ -71,7 +73,9 @@ i.e. ``dt``, as well as the carrier frequency of the signals, i.e. ``w``. The pl
 envelopes and the signals resulting from this conversion. The dashed line shows the time at which
 the virtual ``Z`` gate is applied.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from matplotlib import pyplot as plt
     from qiskit_dynamics.pulse import InstructionToSignals
@@ -99,7 +103,9 @@ to simulate pulse schedules. This requires specifying which channels act on whic
 carrier frequencies, and sample width ``dt``. Additionally, we setup this solver in the rotating
 frame and perform the rotating wave approximation.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit.quantum_info.operators import Operator
     from qiskit_dynamics import Solver
@@ -131,17 +137,26 @@ In the last step we perform the simulation and plot the results. Note that, as w
 ``converter.get_signals`` above can also be passed to the ``signals`` argument and in this case
 should produce identical behavior.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
+    import time
     from qiskit.quantum_info.states import Statevector
 
     # Start the qubit in its ground state.
     y0 = Statevector([1., 0.])
 
-    %time sol = hamiltonian_solver.solve(t_span=[0., 2*T], y0=y0, signals=sxp, atol=1e-8, rtol=1e-8)
+    start_time = time.time()
+    
+    sol = hamiltonian_solver.solve(t_span=[0., 2*T], y0=y0, signals=sxp, atol=1e-8, rtol=1e-8)
+
+    print(f"Run time: {time.time() - start_time}")
 
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     def plot_populations(sol):
         pop0 = [psi.probabilities()[0] for psi in sol.y]
@@ -163,6 +178,8 @@ instruction in the pulse schedule. As expected, the first pulse moves the qubit 
 the ``Y`` operator. Therefore, the second pulse, which drives around the ``Y``-axis due to the phase
 shift, has hardley any influence on the populations of the qubit.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     plot_populations(sol)

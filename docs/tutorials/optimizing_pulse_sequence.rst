@@ -24,7 +24,9 @@ We will optimize an :math:`X`-gate on a model of a qubit system using the follow
 
 First, set JAX to operate in 64-bit mode and to run on CPU.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import jax
     jax.config.update("jax_enable_x64", True)
@@ -51,7 +53,9 @@ In the above:
 
 We will setup the problem to be in the rotating frame of the drift term.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import numpy as np
     from qiskit.quantum_info import Operator
@@ -100,7 +104,9 @@ We remark that there are many other parameterizations that may achieve the same 
 more efficient strategies for achieving a value of :math:`0` at the beginning and end of the pulse.
 This is only meant to demonstrate the need for such an approach, and one simple example of one.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_dynamics import DiscreteSignal
     from qiskit_dynamics.signals import Convolution
@@ -134,7 +140,9 @@ This is only meant to demonstrate the need for such an approach, and one simple 
 
 Observe, for example, the signal generated when all parameters are :math:`10^8`:
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     signal = signal_mapping(np.ones(80) * 1e8)
     signal.draw(t0=0., tf=signal.duration * signal.dt, n=1000, function='envelope')
@@ -148,7 +156,9 @@ the pulse via the standard fidelity measure:
 
 .. math:: f(U) = \frac{|\text{Tr}(XU)|^2}{4}
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     X_op = Operator.from_label('X').data
 
@@ -164,7 +174,9 @@ The function we want to optimize consists of:
 -  Simulating the Schrodinger equation over the length of the pulse sequence.
 -  Computing and return the infidelity (we minimize :math:`1 - f(U)`).
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     def objective(params):
 
@@ -199,7 +211,9 @@ Finally, we gradient optimize the objective:
 -  Call ``scipy.optimize.minimize`` with the above, with ``method='BFGS'`` and ``jac=True`` to
    indicate that the passed objective also computes the gradient.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from jax import jit, value_and_grad
     from scipy.optimize import minimize
@@ -220,7 +234,9 @@ solver.
 We can draw the optimized signal, which is retrieved by applying the ``signal_mapping`` to the
 optimized parameters.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     opt_signal = signal_mapping(opt_results.x)
 
@@ -236,7 +252,9 @@ optimized parameters.
 Summing the signal samples yields approximately :math:`\pm 50`, which is equivalent to what one
 would expect based on a rotating wave approximation analysis.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     opt_signal.samples.sum()
 
@@ -252,7 +270,9 @@ instance, parameterized by ``sigma`` and ``width``. Although qiskit pulse provid
 :class:`~qiskit.pulse.library.GaussianSquare`, this class is not JAX compatible. See the user guide
 entry on :ref:`JAX-compatible pulse schedules <how-to use pulse schedules for jax-jit>`.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import sympy as sym
     from qiskit import pulse
@@ -310,7 +330,9 @@ entry on :ref:`JAX-compatible pulse schedules <how-to use pulse schedules for ja
 Next, we construct a pulse schedule using the above parametrized Gaussian square pulse, convert it
 to a signal, and simulate the equation over the length of the pulse sequence.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from qiskit_dynamics.pulse import InstructionToSignals
 
@@ -341,12 +363,16 @@ to a signal, and simulate the equation over the length of the pulse sequence.
 We set the initial values of ``sigma`` and ``width`` for the optimization as
 ``initial_params = np.array([10, 10])``.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     initial_params = np.array([10, 10])
     gaussian_square_generated_by_pulse(initial_params).draw()
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     from jax import jit, value_and_grad
     from scipy.optimize import minimize
@@ -367,6 +393,8 @@ We set the initial values of ``sigma`` and ``width`` for the optimization as
 
 We can draw the optimized pulse, whose parameters are retrieved by ``opt_results.x``.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     gaussian_square_generated_by_pulse(opt_results.x).draw()

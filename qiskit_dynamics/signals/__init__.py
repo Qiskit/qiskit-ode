@@ -142,8 +142,8 @@ envelope (and keep the carrier analog), or to also sample the carrier. Below is 
 signal superimposed with sampled versions, both in the case of sampling the carrier, and in the case
 of sampling just the envelope (and keeping the carrier analog).
 
-.. jupyter-execute::
-    :hide-code:
+.. plot::
+    :context: close-figs
 
     from qiskit_dynamics.signals import Signal, DiscreteSignal
     from matplotlib import pyplot as plt
@@ -177,7 +177,9 @@ response. The code below shows the example of an :class:`IQMixer`. Here, two sig
 carrier frequency of 400 MHz to create a signal at 500 MHz. Note that the code below does not make
 any assumptions about the time and frequency units which we interpret as ns and GHz, respectively.
 
-.. jupyter-execute::
+.. plot::
+    :context: close-figs
+    :include-source:
 
     import numpy as np
     from qiskit_dynamics.signals import DiscreteSignal, Sampler, IQMixer
